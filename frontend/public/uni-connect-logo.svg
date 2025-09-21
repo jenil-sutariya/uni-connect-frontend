@@ -1,0 +1,26 @@
+<svg width="180" height="50" viewBox="0 0 180 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple Circle Icon -->
+  <circle cx="25" cy="25" r="20" fill="#3182CE" stroke="#2C5282" stroke-width="2"/>
+  
+  <!-- Simple "U" shape inside circle -->
+  <path d="M15 15 L15 25 Q15 30 20 30 L30 30 Q35 30 35 25 L35 15" 
+        stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Simple connection dots -->
+  <circle cx="32" cy="15" r="2" fill="#FFFFFF"/>
+  <circle cx="32" cy="35" r="2" fill="#FFFFFF"/>
+  <line x1="32" y1="15" x2="32" y2="35" stroke="#FFFFFF" stroke-width="1"/>
+  
+  <!-- Clean Typography -->
+  <text x="55" y="22" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2D3748">UNI</text>
+  <text x="55" y="38" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#3182CE">CONNECT</text>
+  
+  <!-- Simple connection visual -->
+  <g transform="translate(130, 15)">
+    <circle cx="0" cy="0" r="3" fill="#3182CE"/>
+    <circle cx="15" cy="10" r="3" fill="#3182CE"/>
+    <circle cx="5" cy="20" r="3" fill="#3182CE"/>
+    <line x1="0" y1="0" x2="15" y2="10" stroke="#3182CE" stroke-width="2"/>
+    <line x1="15" y1="10" x2="5" y2="20" stroke="#3182CE" stroke-width="2"/>
+  </g>
+</svg>

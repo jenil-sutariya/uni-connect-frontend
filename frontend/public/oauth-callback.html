@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Callback</title>
+</head>
+<body>
+    <script>
+        // Extract access token from URL hash
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        
+        if (accessToken) {
+            // Send message to parent window
+            window.opener.postMessage({
+                type: 'GOOGLE_OAUTH_SUCCESS',
+                accessToken: accessToken
+            }, window.location.origin);
+            
+            // Close popup
+            window.close();
+        } else {
+            // Handle error
+            window.opener.postMessage({
+                type: 'GOOGLE_OAUTH_ERROR',
+                error: 'Failed to get access token'
+            }, window.location.origin);
+            window.close();
+        }
+    </script>
+</body>
+</html>
