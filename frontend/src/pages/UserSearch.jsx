@@ -16,8 +16,9 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import io from "socket.io-client";
+import { SOCKET_URL } from "../utils/api";
 
-const socket = io("http://localhost:7000"); // Replace with your backend URL
+const socket = io(SOCKET_URL || "http://localhost:7000");
 
 const UserSearch = () => {
     const [query, setQuery] = useState("");
