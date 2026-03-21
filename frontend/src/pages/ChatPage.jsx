@@ -3,12 +3,13 @@ import { Box, Button, Flex, Input, Skeleton, SkeletonCircle, Text, useColorModeV
 import Conversation from "../components/Conversation";
 import { GiConversation } from "react-icons/gi";
 import MessageContainer from "../components/MessageContainer";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext";
+import { useNavigate } from "react-router-dom";
 
 const ChatPage = () => {
 	const [searchingUser, setSearchingUser] = useState(false);
@@ -17,8 +18,21 @@ const ChatPage = () => {
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
 	const [conversations, setConversations] = useRecoilState(conversationsAtom);
 	const currentUser = useRecoilValue(userAtom);
+	const setUser = useSetRecoilState(userAtom);
 	const showToast = useShowToast();
 	const { socket, onlineUsers } = useSocket();
+	const navigate = useNavigate();
+	const safeConversations = Array.isArray(conversations)
+		? conversations.filter((conversation) => conversation?.participants?.[0]?._id)
+		: [];
+
+	const handleUnauthorized = useCallback(() => {
+		localStorage.removeItem("user-threads");
+		setUser(null);
+		setConversations([]);
+		showToast("Session expired", "Please log in again to open chat.", "warning");
+		navigate("/auth?mode=login");
+	}, [navigate, setConversations, setUser, showToast]);
 
 	useEffect(() => {
 		const handleMessagesSeen = ({ conversationId }) => {
@@ -49,20 +63,31 @@ const ChatPage = () => {
 			try {
 				const res = await fetch("/api/messages/conversations");
 				const data = await res.json();
-				if (data.error) {
-					showToast("Error", data.error, "error");
+				if (res.status === 401) {
+					handleUnauthorized();
+					return;
+				}
+				if (!res.ok) {
+					showToast("Error", data.error || data.message || "Failed to load conversations", "error");
+					setConversations([]);
+					return;
+				}
+				if (!Array.isArray(data)) {
+					showToast("Error", "Invalid conversations response from server", "error");
+					setConversations([]);
 					return;
 				}
 				setConversations(data);
 			} catch (error) {
 				showToast("Error", error.message, "error");
+				setConversations([]);
 			} finally {
 				setLoadingConversations(false);
 			}
 		};
 
 		getConversations();
-	}, [showToast, setConversations]);
+	}, [handleUnauthorized, showToast, setConversations]);
 
 	const handleConversationSearch = async (e) => {
 		e.preventDefault();
@@ -81,7 +106,7 @@ const ChatPage = () => {
 				return;
 			}
 
-			const conversationAlreadyExists = conversations.find(
+			const conversationAlreadyExists = safeConversations.find(
 				(conversation) => conversation.participants[0]._id === searchedUser._id
 			);
 
@@ -162,13 +187,18 @@ const ChatPage = () => {
 
 					<Flex flexDirection='column' gap={1} maxH={{ base: "280px", lg: "70vh" }} overflowY='auto' pr={1}>
 						{!loadingConversations &&
-							conversations.map((conversation) => (
+							safeConversations.map((conversation) => (
 								<Conversation
 									key={conversation._id}
 									isOnline={onlineUsers.includes(conversation.participants[0]._id)}
 									conversation={conversation}
 								/>
 							))}
+						{!loadingConversations && safeConversations.length === 0 && (
+							<Text fontSize='sm' color='gray.500' py={4}>
+								No conversations yet.
+							</Text>
+						)}
 					</Flex>
 				</Flex>
 				{!selectedConversation._id && (

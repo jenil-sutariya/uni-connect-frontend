@@ -15,13 +15,16 @@ import { BsCheck2All, BsFillImageFill } from "react-icons/bs";
 import { selectedConversationAtom } from "../atoms/messagesAtom";
 
 const Conversation = ({ conversation, isOnline }) => {
-	const user = conversation.participants[0];
+	const user = conversation?.participants?.[0];
 	const currentUser = useRecoilValue(userAtom);
-	const lastMessage = conversation.lastMessage;
+	const lastMessage = conversation?.lastMessage || {};
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
 	const { colorMode } = useColorMode();
+	const lastMessageText = typeof lastMessage.text === "string" ? lastMessage.text : "";
 	const messagePreview =
-		lastMessage.text.length > 18 ? `${lastMessage.text.substring(0, 18)}...` : lastMessage.text;
+		lastMessageText.length > 18 ? `${lastMessageText.substring(0, 18)}...` : lastMessageText;
+
+	if (!user) return null;
 
 	return (
 		<Flex
@@ -64,7 +67,7 @@ const Conversation = ({ conversation, isOnline }) => {
 					{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
 				</Text>
 				<Flex fontSize={"xs"} alignItems={"center"} gap={1} minW={0}>
-					{currentUser._id === lastMessage.sender ? (
+					{currentUser?._id === lastMessage.sender ? (
 						<Box as='span' display='inline-flex' color={lastMessage.seen ? "blue.400" : undefined} flexShrink={0}>
 							<BsCheck2All size={16} />
 						</Box>

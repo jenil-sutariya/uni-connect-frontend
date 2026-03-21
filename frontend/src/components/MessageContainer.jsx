@@ -19,7 +19,9 @@ const MessageContainer = () => {
 	const messageEndRef = useRef(null);
 
 	useEffect(() => {
-		socket.on("newMessage", (message) => {
+		if (!socket) return;
+
+		const handleNewMessage = (message) => {
 			if (selectedConversation._id === message.conversationId) {
 				setMessages((prev) => [...prev, message]);
 			}
@@ -45,12 +47,16 @@ const MessageContainer = () => {
 				});
 				return updatedConversations;
 			});
-		});
+		};
 
-		return () => socket.off("newMessage");
+		socket.on("newMessage", handleNewMessage);
+
+		return () => socket.off("newMessage", handleNewMessage);
 	}, [socket, selectedConversation, setConversations]);
 
 	useEffect(() => {
+		if (!socket) return;
+
 		const lastMessageIsFromOtherUser = messages.length && messages[messages.length - 1].sender !== currentUser._id;
 		if (lastMessageIsFromOtherUser) {
 			socket.emit("markMessagesAsSeen", {
@@ -93,13 +99,17 @@ const MessageContainer = () => {
 				if (selectedConversation.mock) return;
 				const res = await fetch(`/api/messages/${selectedConversation.userId}`);
 				const data = await res.json();
-				if (data.error) {
-					showToast("Error", data.error, "error");
+				if (!res.ok) {
+					if (res.status !== 404) {
+						showToast("Error", data.error || data.message || "Failed to load messages", "error");
+					}
+					setMessages([]);
 					return;
 				}
-				setMessages(data);
+				setMessages(Array.isArray(data) ? data : []);
 			} catch (error) {
 				showToast("Error", error.message, "error");
+				setMessages([]);
 			} finally {
 				setLoadingMessages(false);
 			}

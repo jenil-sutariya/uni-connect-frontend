@@ -13,6 +13,7 @@ import ChatPage from "./pages/ChatPage";
 import UserSearch from "./pages/UserSearch";
 import { SettingsPage } from "./pages/SettingsPage";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
+import ErrorBoundary from "./components/ErrorBoundary";
 function App() {
 	const user = useRecoilValue(userAtom);
 	const { pathname } = useLocation();
@@ -48,7 +49,7 @@ function App() {
 						}
 					/>
 					<Route path='/:username/post/:pid' element={<PostPage />} />
-					<Route path='/chat' element={user ? <ChatPage /> : <Navigate to={"/auth"} />} />
+					<Route path='/chat' element={user ? <ErrorBoundary><ChatPage /></ErrorBoundary> : <Navigate to={"/auth"} />} />
 					<Route path='/search' element={user ? <UserSearch /> : <Navigate to={"/auth"} />} />
 					<Route path='/settings' element={user ? <SettingsPage /> : <Navigate to={"/auth"} />} />
 					<Route path='/professor' element={user?.role === "professor" ? <ProfessorDashboard /> : <Navigate to={"/"} />} />
