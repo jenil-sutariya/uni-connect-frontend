@@ -1,11 +1,9 @@
 import {
 	Box,
-	VStack,
 	Text,
 	Button,
 	Collapse,
 	useDisclosure,
-	useColorModeValue,
 	Icon,
 	Flex,
 } from "@chakra-ui/react";
@@ -24,7 +22,6 @@ const CommentSection = ({
 }) => {
 	const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: showByDefault });
 	const [localComments, setLocalComments] = useState(comments);
-	const bgColor = useColorModeValue("gray.50", "gray.800");
 
 	useEffect(() => {
 		setLocalComments(comments);
@@ -72,7 +69,7 @@ const CommentSection = ({
 					{/* Vertical Thread Line */}
 					<Box
 						position="absolute"
-						left="20px"
+						left={{ base: "14px", md: "20px" }}
 						top="0"
 						bottom="0"
 						width="2px"
@@ -81,7 +78,7 @@ const CommentSection = ({
 					/>
 					
 					{/* Comment Input */}
-					<Box ml="40px" flex={1}>
+					<Box ml={{ base: "28px", md: "40px" }} flex={1}>
 						<CommentInput
 							onComment={handleAddComment}
 							type={type}
@@ -97,7 +94,7 @@ const CommentSection = ({
 						{/* Vertical Thread Line */}
 						<Box
 							position="absolute"
-							left="20px"
+							left={{ base: "14px", md: "20px" }}
 							top="0"
 							bottom="0"
 							width="2px"
@@ -105,7 +102,7 @@ const CommentSection = ({
 							zIndex={1}
 						/>
 						
-						<Box ml="40px" flex={1}>
+						<Box ml={{ base: "28px", md: "40px" }} flex={1}>
 							<CommentsList
 								comments={localComments}
 								onDeleteComment={handleDeleteComment}

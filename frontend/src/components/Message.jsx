@@ -9,13 +9,17 @@ const Message = ({ ownMessage, message }) => {
 	const selectedConversation = useRecoilValue(selectedConversationAtom);
 	const user = useRecoilValue(userAtom);
 	const [imgLoaded, setImgLoaded] = useState(false);
+	const bubbleMaxW = { base: "70vw", md: "350px" };
+	const imageWidth = { base: "160px", sm: "200px" };
 	return (
 		<>
 			{ownMessage ? (
-				<Flex gap={2} alignSelf={"flex-end"}>
+				<Flex gap={2} alignSelf={"flex-end"} maxW='full'>
 					{message.text && (
-						<Flex bg={"green.800"} maxW={"350px"} p={1} borderRadius={"md"}>
-							<Text color={"white"}>{message.text}</Text>
+						<Flex bg={"green.800"} maxW={bubbleMaxW} p={2} borderRadius={"md"} alignItems='flex-end'>
+							<Text color={"white"} wordBreak='break-word'>
+								{message.text}
+							</Text>
 							<Box
 								alignSelf={"flex-end"}
 								ml={1}
@@ -27,7 +31,7 @@ const Message = ({ ownMessage, message }) => {
 						</Flex>
 					)}
 					{message.img && !imgLoaded && (
-						<Flex mt={5} w={"200px"}>
+						<Flex mt={5} w={imageWidth}>
 							<Image
 								src={message.img}
 								hidden
@@ -35,12 +39,12 @@ const Message = ({ ownMessage, message }) => {
 								alt='Message image'
 								borderRadius={4}
 							/>
-							<Skeleton w={"200px"} h={"200px"} />
+							<Skeleton w={imageWidth} h={imageWidth} />
 						</Flex>
 					)}
 
 					{message.img && imgLoaded && (
-						<Flex mt={5} w={"200px"}>
+						<Flex mt={5} w={imageWidth}>
 							<Image src={message.img} alt='Message image' borderRadius={4} />
 							<Box
 								alignSelf={"flex-end"}
@@ -56,16 +60,16 @@ const Message = ({ ownMessage, message }) => {
 					<Avatar src={user.profilePic} w='7' h={7} />
 				</Flex>
 			) : (
-				<Flex gap={2}>
+				<Flex gap={2} maxW='full'>
 					<Avatar src={selectedConversation.userProfilePic} w='7' h={7} />
 
 					{message.text && (
-						<Text maxW={"350px"} bg={"gray.400"} p={1} borderRadius={"md"} color={"black"}>
+						<Text maxW={bubbleMaxW} bg={"gray.400"} p={2} borderRadius={"md"} color={"black"} wordBreak='break-word'>
 							{message.text}
 						</Text>
 					)}
 					{message.img && !imgLoaded && (
-						<Flex mt={5} w={"200px"}>
+						<Flex mt={5} w={imageWidth}>
 							<Image
 								src={message.img}
 								hidden
@@ -73,12 +77,12 @@ const Message = ({ ownMessage, message }) => {
 								alt='Message image'
 								borderRadius={4}
 							/>
-							<Skeleton w={"200px"} h={"200px"} />
+							<Skeleton w={imageWidth} h={imageWidth} />
 						</Flex>
 					)}
 
 					{message.img && imgLoaded && (
-						<Flex mt={5} w={"200px"}>
+						<Flex mt={5} w={imageWidth}>
 							<Image src={message.img} alt='Message image' borderRadius={4} />
 						</Flex>
 					)}

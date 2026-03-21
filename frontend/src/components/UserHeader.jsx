@@ -1,5 +1,4 @@
 import { Avatar, Box, Flex, Link, Text, VStack, Menu, MenuButton, MenuItem, MenuList, Portal, Button, useToast } from "@chakra-ui/react";
-import { BsInstagram } from "react-icons/bs";
 import { CgMoreO } from "react-icons/cg";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
@@ -25,20 +24,26 @@ const UserHeader = ({ user }) => {
 	};
 
 	return (
-		<VStack gap={4} alignItems={"start"}>
-			<Flex justifyContent={"space-between"} w={"full"}>
-				<Box>
-					<Text fontSize={"2xl"} fontWeight={"bold"}>
+		<VStack gap={4} alignItems={"start"} w='full'>
+			<Flex
+				justifyContent={"space-between"}
+				alignItems={{ base: "flex-start", sm: "center" }}
+				direction={{ base: "column-reverse", sm: "row" }}
+				gap={4}
+				w={"full"}
+			>
+				<Box minW={0}>
+					<Text fontSize={{ base: "xl", sm: "2xl" }} fontWeight={"bold"} wordBreak='break-word'>
 						{user.name}
 					</Text>
-					<Flex gap={2} alignItems={"center"}>
+					<Flex gap={2} alignItems={"center"} flexWrap='wrap'>
 						<Text fontSize={"sm"}>{user.username}</Text>
 						{/* <Text fontSize={"xs"} bg={"gray.dark"} color={"gray.light"} p={1} borderRadius={"full"}>
 							threads.net
 						</Text> */}
 					</Flex>
 				</Box>
-				<Box>
+				<Box alignSelf={{ base: "flex-end", sm: "auto" }}>
 					{user.profilePic && (
 						<Avatar
 							name={user.name}
@@ -62,7 +67,9 @@ const UserHeader = ({ user }) => {
 				</Box>
 			</Flex>
 
-			<Text>{user.bio}</Text>
+			<Text w='full' wordBreak='break-word'>
+				{user.bio}
+			</Text>
 
 			{currentUser?._id === user._id && (
 				<Link as={RouterLink} to='/update'>
@@ -74,14 +81,20 @@ const UserHeader = ({ user }) => {
 					{following ? "Unfollow" : "Follow"}
 				</Button>
 			)}
-			<Flex w={"full"} justifyContent={"space-between"}>
-				<Flex gap={2} alignItems={"center"}>
+			<Flex
+				w={"full"}
+				justifyContent={"space-between"}
+				alignItems={{ base: "flex-start", sm: "center" }}
+				direction={{ base: "column", sm: "row" }}
+				gap={3}
+			>
+				<Flex gap={2} alignItems={"center"} flexWrap='wrap'>
 					<Text color={"gray.light"}>{user.followers.length} followers</Text>
-					<Box w='1' h='1' bg={"gray.light"} borderRadius={"full"}></Box>
+					<Box w='1' h='1' bg={"gray.light"} borderRadius={"full"} display={{ base: "none", sm: "block" }}></Box>
 					<Text color={"gray.light"}>{user.following.length} following</Text>
 					{/* <Link color={"gray.light"}>instagram.com</Link> */}
 				</Flex>
-				<Flex>
+				<Flex alignSelf={{ base: "flex-end", sm: "auto" }}>
 					{/* <Box className='icon-container'>
 						<BsInstagram size={24} cursor={"pointer"} />
 					</Box> */}

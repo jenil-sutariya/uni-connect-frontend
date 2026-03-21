@@ -14,6 +14,7 @@ import {
 	Select,
 	VStack,
 	HStack,
+	Stack,
 	Text,
 	Checkbox,
 	CheckboxGroup,
@@ -23,13 +24,11 @@ import {
 	useColorModeValue,
 	Image,
 	Flex,
-	IconButton,
 	CloseButton,
 	Divider,
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { BsFillImageFill } from "react-icons/bs";
-import { AddIcon } from "@chakra-ui/icons";
 import useShowToast from "../hooks/useShowToast";
 
 const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => {
@@ -236,12 +235,16 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 	};
 
 	return (
-		<Modal isOpen={isOpen} onClose={handleClose} size="xl">
+		<Modal isOpen={isOpen} onClose={handleClose} size="xl" scrollBehavior="inside">
 			<ModalOverlay />
-			<ModalContent maxW="600px">
+			<ModalContent
+				maxW={{ base: "calc(100vw - 1.5rem)", md: "600px" }}
+				mx={{ base: 3, md: 6 }}
+				my={{ base: 3, md: 6 }}
+			>
 				<ModalHeader>Create New Announcement</ModalHeader>
 				<ModalCloseButton />
-				<ModalBody>
+				<ModalBody pb={6}>
 					<VStack spacing={4} align="stretch">
 						{/* Title */}
 						<FormControl isRequired>
@@ -261,6 +264,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								value={formData.content}
 								onChange={(e) => handleInputChange("content", e.target.value)}
 								rows={5}
+								minH={{ base: "120px", md: "auto" }}
 							/>
 						</FormControl>
 
@@ -268,19 +272,20 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 						<FormControl>
 							<FormLabel>Photos (Optional)</FormLabel>
 							<VStack align="stretch" spacing={3}>
-								<HStack>
+								<Stack direction={{ base: "column", sm: "row" }} align={{ base: "stretch", sm: "center" }} spacing={3}>
 									<Button
 										leftIcon={<BsFillImageFill />}
 										onClick={() => imageRef.current?.click()}
 										variant="outline"
 										size="sm"
+										w={{ base: "full", sm: "auto" }}
 									>
 										Add Photos
 									</Button>
 									<Text fontSize="sm" color="gray.500">
 										Maximum 5 photos allowed
 									</Text>
-								</HStack>
+								</Stack>
 
 								<Input
 									type="file"
@@ -297,7 +302,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 										<Text fontSize="sm" fontWeight="medium" mb={2}>
 											Selected Photos ({photos.length}/5):
 										</Text>
-										<SimpleGrid columns={2} spacing={3}>
+										<SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
 											{photos.map((photo) => (
 												<Box key={photo.id} position="relative">
 													<Image
@@ -346,7 +351,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 									value={formData.targetDepartments}
 									onChange={handleDepartmentChange}
 								>
-									<SimpleGrid columns={2} spacing={2}>
+									<SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
 										{departments.map((dept) => (
 											<Checkbox
 												key={dept.code}
@@ -383,7 +388,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 									value={formData.targetBatches}
 									onChange={handleBatchChange}
 								>
-									<SimpleGrid columns={4} spacing={2}>
+									<SimpleGrid columns={{ base: 2, md: 4 }} spacing={2}>
 										{batches.map((batch) => (
 											<Checkbox
 												key={batch}
@@ -412,7 +417,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 						</FormControl>
 
 						{/* Priority and Category */}
-						<HStack spacing={4}>
+						<Stack direction={{ base: "column", md: "row" }} spacing={4}>
 							<FormControl>
 								<FormLabel>Priority</FormLabel>
 								<Select
@@ -439,7 +444,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 									<option value="emergency">Emergency</option>
 								</Select>
 							</FormControl>
-						</HStack>
+						</Stack>
 
 						{/* Expiry Date */}
 						<FormControl>
@@ -454,17 +459,20 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 				</ModalBody>
 
 				<ModalFooter>
-					<Button variant="ghost" mr={3} onClick={handleClose}>
-						Cancel
-					</Button>
-					<Button
-						colorScheme="blue"
-						onClick={handleSubmit}
-						isLoading={loading}
-						loadingText="Creating..."
-					>
-						Create Announcement
-					</Button>
+					<Flex w="full" gap={3} direction={{ base: "column-reverse", sm: "row" }} justify="flex-end">
+						<Button variant="ghost" onClick={handleClose} w={{ base: "full", sm: "auto" }}>
+							Cancel
+						</Button>
+						<Button
+							colorScheme="blue"
+							onClick={handleSubmit}
+							isLoading={loading}
+							loadingText="Creating..."
+							w={{ base: "full", sm: "auto" }}
+						>
+							Create Announcement
+						</Button>
+					</Flex>
 				</ModalFooter>
 			</ModalContent>
 		</Modal>

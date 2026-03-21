@@ -26,6 +26,9 @@ const UserSearch = () => {
     const [loading, setLoading] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const panelBg = useColorModeValue("white", "gray.dark");
+    const headingColor = useColorModeValue("gray.600", "gray.400");
+    const dividerColor = useColorModeValue("gray.200", "whiteAlpha.200");
 
     // Get the current user's data from localStorage
     useEffect(() => {
@@ -65,16 +68,19 @@ const UserSearch = () => {
     };
 
     return (
-        <Box
-            position="absolute"
-            left="50%"
-            w={{ base: "100%", md: "80%", lg: "750px" }}
-            p={4}
-            transform="translateX(-50%)"
-        >
-            <Flex gap={4} flexDirection="column" mx="auto">
+        <Box w="full" py={{ base: 2, md: 4 }}>
+            <Flex
+                gap={4}
+                flexDirection="column"
+                mx="auto"
+                w="full"
+                maxW={{ base: "full", md: "720px" }}
+                bg={panelBg}
+                borderRadius="xl"
+                p={{ base: 3, md: 4 }}
+            >
                 <Flex alignItems="center" justifyContent="space-between">
-                    <Text fontWeight={700} color={useColorModeValue("gray.600", "gray.400")}>
+                    <Text fontWeight={700} color={headingColor}>
                         Search Users
                     </Text>
                     <IconButton
@@ -86,7 +92,7 @@ const UserSearch = () => {
                 </Flex>
 
                 {/* Search Bar */}
-                <Flex alignItems="center" gap={2}>
+                <Flex alignItems="center" gap={2} flexDirection={{ base: "column", sm: "row" }}>
                     <Input
                         placeholder="Search for a user"
                         value={query}
@@ -95,7 +101,7 @@ const UserSearch = () => {
                             fetchUsers(e.target.value);
                         }}
                     />
-                    <Button size="sm" isLoading={loading}>
+                    <Button size="sm" isLoading={loading} w={{ base: "full", sm: "auto" }}>
                         <SearchIcon />
                     </Button>
                 </Flex>
@@ -113,7 +119,7 @@ const UserSearch = () => {
                     ))}
 
                 {/* User List */}
-                <List mt={4} maxH="300px" overflowY="auto">
+                <List mt={4} maxH={{ base: "60vh", md: "300px" }} overflowY="auto">
                     {users.length === 0 && !loading && query.length > 0 && (
                         <Text color="gray.500">No users found.</Text>
                     )}
@@ -121,17 +127,20 @@ const UserSearch = () => {
                         <ListItem
                             key={user._id}
                             p={2}
-                            borderBottom="1px solid #ddd"
+                            borderBottom="1px solid"
+                            borderColor={dividerColor}
                             display="flex"
-                            alignItems="center"
+                            flexDirection={{ base: "column", sm: "row" }}
+                            alignItems={{ base: "flex-start", sm: "center" }}
                             justifyContent="space-between"
+                            gap={2}
                             cursor="pointer"
                             _hover={{ bg: "gray.500" }}
                             onClick={() => navigate(`/${user.username}`)} // Redirect to profile
                         >
-                            <Flex alignItems="center">
+                            <Flex alignItems="center" minW={0}>
                                 <Avatar size="sm" src={user.profilePic} mr={3} />
-                                <Text>{user.name} (@{user.username})</Text>
+                                <Text noOfLines={1}>{user.name} (@{user.username})</Text>
                             </Flex>
 
                             {/* Remove Follow Button */}

@@ -121,7 +121,7 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 	return (
 		<>
 			{/* Post-style layout */}
-			<Flex gap={3} mb={4} py={5}>
+			<Flex gap={{ base: 2, md: 3 }} mb={4} py={5} alignItems='flex-start'>
 				<Flex flexDirection={"column"} alignItems={"center"}>
 					<Avatar
 						size='md'
@@ -168,17 +168,23 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 						)}
 					</Box>
 				</Flex>
-				<Flex flex={1} flexDirection={"column"} gap={2}>
-					<Flex justifyContent={"space-between"} w={"full"}>
-						<Flex w={"full"} alignItems={"center"}>
+				<Flex flex={1} flexDirection={"column"} gap={2} minW={0}>
+					<Flex
+						justifyContent={"space-between"}
+						w={"full"}
+						gap={2}
+						alignItems={{ base: "flex-start", sm: "center" }}
+						flexWrap='wrap'
+					>
+						<Flex flex={1} minW={0} alignItems={"center"} flexWrap='wrap' gap={2}>
 							<Text
 								fontSize={"sm"}
 								fontWeight={"bold"}
+								noOfLines={1}
 							>
 								{announcement.postedBy?.username}
 							</Text>
 							<Badge
-								ml={2}
 								colorScheme={getPriorityColor(announcement.priority)}
 								variant="solid"
 								fontSize="xs"
@@ -189,8 +195,8 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 								{announcement.priority?.toUpperCase()}
 							</Badge>
 						</Flex>
-						<Flex gap={4} alignItems={"center"}>
-							<Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>
+						<Flex gap={{ base: 2, md: 4 }} alignItems={"center"} flexShrink={0}>
+							<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
 								{formatTimeAgo(announcement.createdAt)}
 							</Text>
 							{isProfessorView && user?._id === announcement.postedBy?._id && (
@@ -206,12 +212,14 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 					</Flex>
 
 					{/* Title */}
-					<Text fontSize={"md"} fontWeight={"semibold"} color="gray.800">
+					<Text fontSize={"md"} fontWeight={"semibold"} color={useColorModeValue("gray.800", "whiteAlpha.900")} wordBreak='break-word'>
 						{announcement.title}
 					</Text>
 
 					{/* Content */}
-					<Text fontSize={"sm"}>{announcement.content}</Text>
+					<Text fontSize={"sm"} wordBreak='break-word'>
+						{announcement.content}
+					</Text>
 
 					{/* Photos - Post-style display */}
 					{announcement.photos && Array.isArray(announcement.photos) && announcement.photos.length > 0 && (
@@ -241,7 +249,7 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 										📸 {announcement.photos.length} photos
 									</Text>
 									<SimpleGrid 
-										columns={announcement.photos.length === 2 ? 2 : announcement.photos.length === 3 ? 3 : 2} 
+										columns={{ base: 1, sm: 2, md: announcement.photos.length === 3 ? 3 : 2 }} 
 										spacing={2}
 									>
 										{announcement.photos.slice(0, 4).map((photo, index) => (
@@ -256,7 +264,7 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 														src={photo}
 														alt={`Announcement photo ${index + 1}`}
 														w="full"
-														h="150px"
+														h={{ base: "220px", sm: "150px" }}
 														objectFit="cover"
 														onError={(e) => {
 															console.log("Image failed to load:", photo);
@@ -292,7 +300,7 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 					)}
 
 					{/* Targeting Info */}
-					<Flex gap={3} my={1} fontSize="xs" color="gray.500">
+					<Flex gap={3} my={1} fontSize="xs" color="gray.500" flexWrap='wrap' direction={{ base: "column", sm: "row" }}>
 						<Text>📍 {announcement.targetDepartments?.join(', ')}</Text>
 						<Text>🎓 {announcement.targetBatches?.join(', ')}</Text>
 					</Flex>

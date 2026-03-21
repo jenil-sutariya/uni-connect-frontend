@@ -71,18 +71,23 @@ const PostPage = () => {
 
 	return (
 		<>
-			<Flex>
-				<Flex w={"full"} alignItems={"center"} gap={3}>
+			<Flex
+				justifyContent={"space-between"}
+				alignItems={{ base: "flex-start", sm: "center" }}
+				direction={{ base: "column", sm: "row" }}
+				gap={3}
+			>
+				<Flex w={"full"} alignItems={"center"} gap={3} minW={0}>
 					<Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' />
-					<Flex>
-						<Text fontSize={"sm"} fontWeight={"bold"}>
+					<Flex minW={0}>
+						<Text fontSize={"sm"} fontWeight={"bold"} noOfLines={1}>
 							{user.username}
 						</Text>
 						{/* <Image src='/verified.png' w='4' h={4} ml={4} /> */}
 					</Flex>
 				</Flex>
-				<Flex gap={4} alignItems={"center"}>
-					<Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>
+				<Flex gap={{ base: 2, md: 4 }} alignItems={"center"}>
+					<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
 						{formatDistanceToNow(new Date(currentPost.createdAt))} ago
 					</Text>
 
@@ -92,7 +97,9 @@ const PostPage = () => {
 				</Flex>
 			</Flex>
 
-			<Text my={3}>{currentPost.text}</Text>
+			<Text my={3} wordBreak='break-word'>
+				{currentPost.text}
+			</Text>
 
 			{currentPost.img && (
 				<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>

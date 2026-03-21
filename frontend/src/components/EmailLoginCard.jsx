@@ -137,10 +137,10 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 	};
 
 	return (
-		<Flex align={"center"} justify={"center"}>
-			<Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
+		<Flex align={"center"} justify={"center"} w='full' px={{ base: 0, sm: 4 }}>
+			<Stack spacing={{ base: 6, md: 8 }} mx={"auto"} maxW={"lg"} w='full' py={{ base: 6, md: 12 }} px={{ base: 0, sm: 6 }}>
 				<Stack align={"center"}>
-					<Heading fontSize={"4xl"} textAlign={"center"}>
+					<Heading fontSize={{ base: "3xl", md: "4xl" }} textAlign={"center"}>
 						Login
 					</Heading>
 					<Text fontSize={"lg"} color={"gray.600"}>
@@ -151,11 +151,13 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 					rounded={"lg"} 
 					bg={useColorModeValue("white", "gray.dark")} 
 					boxShadow={"lg"} 
-					p={8}
-					w={{
+					p={{ base: 5, md: 8 }}
+					w='full'
+					maxW={{
 						base: "full",
 						sm: "400px",
 					}}
+					mx='auto'
 				>
 					<Stack spacing={4}>
 						<FormControl isRequired>
@@ -205,7 +207,7 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 							
 							<Divider />
 							
-							<Box display="flex" justifyContent="center">
+							<Box display="flex" justifyContent="center" w='full' overflowX='auto' pb={1}>
 								<GoogleLogin
 									onSuccess={handleGoogleLogin}
 									onError={() => {

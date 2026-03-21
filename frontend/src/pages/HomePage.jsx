@@ -62,11 +62,11 @@ const HomePage = () => {
 	}, [showToast, setPosts, user]);
 
 	return (
-		<Flex gap='10' alignItems={"flex-start"}>
-			<Box flex={70}>
+		<Flex gap={{ base: 6, lg: 10 }} alignItems={"flex-start"} direction={{ base: "column", lg: "row" }}>
+			<Box flex={1} w='full'>
 				{/* Tab Navigation for Students */}
 				{user?.role === "student" ? (
-					<Tabs variant="enclosed" colorScheme="blue">
+					<Tabs variant="enclosed" colorScheme="blue" size={{ base: "sm", md: "md" }} isFitted>
 						<TabList>
 							<Tab>
 								<HStack>
@@ -160,10 +160,11 @@ const HomePage = () => {
 				)}
 			</Box>
 			<Box
-				flex={30}
+				flexShrink={0}
+				w={{ lg: "280px" }}
 				display={{
 					base: "none",
-					md: "block",
+					lg: "block",
 				}}
 			>
 				<ErrorBoundary>

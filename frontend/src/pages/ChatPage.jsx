@@ -21,7 +21,7 @@ const ChatPage = () => {
 	const { socket, onlineUsers } = useSocket();
 
 	useEffect(() => {
-		socket?.on("messagesSeen", ({ conversationId }) => {
+		const handleMessagesSeen = ({ conversationId }) => {
 			setConversations((prev) => {
 				const updatedConversations = prev.map((conversation) => {
 					if (conversation._id === conversationId) {
@@ -37,7 +37,11 @@ const ChatPage = () => {
 				});
 				return updatedConversations;
 			});
-		});
+		};
+
+		socket?.on("messagesSeen", handleMessagesSeen);
+
+		return () => socket?.off("messagesSeen", handleMessagesSeen);
 	}, [socket, setConversations]);
 
 	useEffect(() => {
@@ -116,27 +120,26 @@ const ChatPage = () => {
 	};
 
 	return (
-		<Box
-			position={"absolute"}
-			left={"50%"}
-			w={{ base: "100%", md: "80%", lg: "750px" }}
-			p={4}
-			transform={"translateX(-50%)"}
-		>
+		<Box w='full' py={{ base: 2, md: 4 }}>
 			<Flex
-				gap={4}
-				flexDirection={{ base: "column", md: "row" }}
-				maxW={{
-					sm: "400px",
-					md: "full",
-				}}
+				gap={{ base: 4, lg: 6 }}
+				flexDirection={{ base: "column", lg: "row" }}
+				alignItems='stretch'
 				mx={"auto"}
 			>
-				<Flex flex={30} gap={2} flexDirection={"column"} maxW={{ sm: "250px", md: "full" }} mx={"auto"}>
+				<Flex
+					flexDirection={"column"}
+					gap={3}
+					w='full'
+					flex={{ lg: "0 0 320px" }}
+					bg={useColorModeValue("white", "gray.dark")}
+					borderRadius='xl'
+					p={{ base: 3, md: 4 }}
+				>
 					<Text fontWeight={700} color={useColorModeValue("gray.600", "gray.400")}>
 						Your Conversations
 					</Text>
-					<form onSubmit={handleConversationSearch}>
+					<form onSubmit={handleConversationSearch} style={{ width: "100%" }}>
 						<Flex alignItems={"center"} gap={2}>
 							<Input placeholder='Search for a user' onChange={(e) => setSearchText(e.target.value)} />
 							<Button size={"sm"} onClick={handleConversationSearch} isLoading={searchingUser}>
@@ -158,24 +161,28 @@ const ChatPage = () => {
 							</Flex>
 						))}
 
-					{!loadingConversations &&
-						conversations.map((conversation) => (
-							<Conversation
-								key={conversation._id}
-								isOnline={onlineUsers.includes(conversation.participants[0]._id)}
-								conversation={conversation}
-							/>
-						))}
+					<Flex flexDirection='column' gap={1} maxH={{ base: "280px", lg: "70vh" }} overflowY='auto' pr={1}>
+						{!loadingConversations &&
+							conversations.map((conversation) => (
+								<Conversation
+									key={conversation._id}
+									isOnline={onlineUsers.includes(conversation.participants[0]._id)}
+									conversation={conversation}
+								/>
+							))}
+					</Flex>
 				</Flex>
 				{!selectedConversation._id && (
 					<Flex
-						flex={70}
-						borderRadius={"md"}
-						p={2}
+						flex={1}
+						borderRadius={"xl"}
+						p={{ base: 4, md: 6 }}
 						flexDir={"column"}
 						alignItems={"center"}
 						justifyContent={"center"}
-						height={"400px"}
+						minH={{ base: "220px", md: "400px" }}
+						bg={useColorModeValue("white", "gray.dark")}
+						textAlign='center'
 					>
 						<GiConversation size={100} />
 						<Text fontSize={20}>Select a conversation to start messaging</Text>

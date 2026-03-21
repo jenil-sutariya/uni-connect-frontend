@@ -1,4 +1,4 @@
-import { Avatar, Divider, Flex, Image, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
+import { Avatar, Divider, Flex, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useEffect, useRef, useState } from "react";
@@ -59,7 +59,7 @@ const MessageContainer = () => {
 			});
 		}
 
-		socket.on("messagesSeen", ({ conversationId }) => {
+		const handleMessagesSeen = ({ conversationId }) => {
 			if (selectedConversation._id === conversationId) {
 				setMessages((prev) => {
 					const updatedMessages = prev.map((message) => {
@@ -74,7 +74,11 @@ const MessageContainer = () => {
 					return updatedMessages;
 				});
 			}
-		});
+		};
+
+		socket.on("messagesSeen", handleMessagesSeen);
+
+		return () => socket.off("messagesSeen", handleMessagesSeen);
 	}, [socket, currentUser._id, messages, selectedConversation]);
 
 	useEffect(() => {
@@ -106,16 +110,20 @@ const MessageContainer = () => {
 
 	return (
 		<Flex
-			flex='70'
+			flex={1}
+			w='full'
+			minH={{ base: "60vh", md: "500px" }}
+			maxH={{ lg: "72vh" }}
 			bg={useColorModeValue("gray.200", "gray.dark")}
-			borderRadius={"md"}
-			p={2}
+			borderRadius={"xl"}
+			p={{ base: 3, md: 4 }}
 			flexDirection={"column"}
+			overflow='hidden'
 		>
 			{/* Message header */}
-			<Flex w={"full"} h={12} alignItems={"center"} gap={2}>
+			<Flex w={"full"} minH={12} alignItems={"center"} gap={2}>
 				<Avatar src={selectedConversation.userProfilePic} size={"sm"} />
-				<Text display={"flex"} alignItems={"center"}>
+				<Text display={"flex"} alignItems={"center"} noOfLines={1}>
 					{selectedConversation.username} 
 					{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
 				</Text>
@@ -123,7 +131,7 @@ const MessageContainer = () => {
 
 			<Divider />
 
-			<Flex flexDir={"column"} gap={4} my={4} p={2} height={"400px"} overflowY={"auto"}>
+			<Flex flex={1} flexDir={"column"} gap={4} my={4} pr={1} overflowY={"auto"}>
 				{loadingMessages &&
 					[...Array(5)].map((_, i) => (
 						<Flex
@@ -136,20 +144,20 @@ const MessageContainer = () => {
 						>
 							{i % 2 === 0 && <SkeletonCircle size={7} />}
 							<Flex flexDir={"column"} gap={2}>
-								<Skeleton h='8px' w='250px' />
-								<Skeleton h='8px' w='250px' />
-								<Skeleton h='8px' w='250px' />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
 							</Flex>
 							{i % 2 !== 0 && <SkeletonCircle size={7} />}
 						</Flex>
 					))}
 
 				{!loadingMessages &&
-					messages.map((message) => (
+					messages.map((message, index) => (
 						<Flex
 							key={message._id}
 							direction={"column"}
-							ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
+							ref={messages.length - 1 === index ? messageEndRef : null}
 						>
 							<Message message={message} ownMessage={currentUser._id === message.sender} />
 						</Flex>

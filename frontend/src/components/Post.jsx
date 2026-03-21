@@ -58,7 +58,7 @@ const Post = ({ post, postedBy }) => {
 	if (!user) return null;
 	return (
 		<Link to={`/${user.username}/post/${post._id}`}>
-			<Flex gap={3} mb={4} py={5}>
+			<Flex gap={{ base: 2, md: 3 }} mb={4} py={5} alignItems='flex-start'>
 				<Flex flexDirection={"column"} alignItems={"center"}>
 					<Avatar
 						size='md'
@@ -109,12 +109,19 @@ const Post = ({ post, postedBy }) => {
 						)}
 					</Box>
 				</Flex>
-				<Flex flex={1} flexDirection={"column"} gap={2}>
-					<Flex justifyContent={"space-between"} w={"full"}>
-						<Flex w={"full"} alignItems={"center"}>
+				<Flex flex={1} flexDirection={"column"} gap={2} minW={0}>
+					<Flex
+						justifyContent={"space-between"}
+						w={"full"}
+						gap={2}
+						alignItems={{ base: "flex-start", sm: "center" }}
+						flexWrap='wrap'
+					>
+						<Flex flex={1} minW={0} alignItems={"center"}>
 							<Text
 								fontSize={"sm"}
 								fontWeight={"bold"}
+								noOfLines={1}
 								onClick={(e) => {
 									e.preventDefault();
 									navigate(`/${user.username}`);
@@ -124,8 +131,8 @@ const Post = ({ post, postedBy }) => {
 							</Text>
 							{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
 						</Flex>
-						<Flex gap={4} alignItems={"center"}>
-							<Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>
+						<Flex gap={{ base: 2, md: 4 }} alignItems={"center"} flexShrink={0}>
+							<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
 								{formatDistanceToNow(new Date(post.createdAt))} ago
 							</Text>
 
@@ -133,7 +140,9 @@ const Post = ({ post, postedBy }) => {
 						</Flex>
 					</Flex>
 
-					<Text fontSize={"sm"}>{post.text}</Text>
+					<Text fontSize={"sm"} wordBreak='break-word'>
+						{post.text}
+					</Text>
 					{post.img && (
 						<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
 							<Image src={post.img} w={"full"} />

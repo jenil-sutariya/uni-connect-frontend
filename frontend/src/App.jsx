@@ -16,9 +16,18 @@ import ProfessorDashboard from "./pages/ProfessorDashboard";
 function App() {
 	const user = useRecoilValue(userAtom);
 	const { pathname } = useLocation();
+	const isWideLayout =
+		pathname === "/" ||
+		pathname.startsWith("/chat") ||
+		pathname.startsWith("/search") ||
+		pathname.startsWith("/professor");
 	return (
-		<Box position={"relative"} w='full'>
-			<Container maxW={pathname === "/" ? { base: "620px", md: "900px" } : "620px"}>
+		<Box position={"relative"} w='full' minH='100vh'>
+			<Container
+				maxW={isWideLayout ? { base: "100%", md: "900px", lg: "1100px" } : { base: "100%", md: "620px" }}
+				px={{ base: 4, sm: 6 }}
+				pb={{ base: 8, md: 12 }}
+			>
 				<Header />
 				<Routes>
 					<Route path='/' element={user ? <HomePage /> : <Navigate to='/auth' />} />

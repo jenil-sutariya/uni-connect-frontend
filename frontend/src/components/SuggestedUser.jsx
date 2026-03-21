@@ -6,15 +6,20 @@ const SuggestedUser = ({ user }) => {
 	const { handleFollowUnfollow, following, updating } = useFollowUnfollow(user);
 
 	return (
-		<Flex gap={2} justifyContent={"space-between"} alignItems={"center"}>
+		<Flex
+			gap={3}
+			justifyContent={"space-between"}
+			alignItems={{ base: "flex-start", sm: "center" }}
+			flexDirection={{ base: "column", sm: "row" }}
+		>
 			{/* left side */}
-			<Flex gap={2} as={Link} to={`${user.username}`}>
+			<Flex gap={2} as={Link} to={`/${user.username}`} minW={0} flex={1}>
 				<Avatar src={user.profilePic} />
-				<Box>
-					<Text fontSize={"sm"} fontWeight={"bold"}>
+				<Box minW={0}>
+					<Text fontSize={"sm"} fontWeight={"bold"} noOfLines={1}>
 						{user.username}
 					</Text>
-					<Text color={"gray.light"} fontSize={"sm"}>
+					<Text color={"gray.light"} fontSize={"sm"} noOfLines={1}>
 						{user.name}
 					</Text>
 				</Box>
@@ -26,6 +31,7 @@ const SuggestedUser = ({ user }) => {
 				bg={following ? "white" : "blue.400"}
 				onClick={handleFollowUnfollow}
 				isLoading={updating}
+				w={{ base: "full", sm: "auto" }}
 				_hover={{
 					color: following ? "black" : "white",
 					opacity: ".8",
