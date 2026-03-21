@@ -19,9 +19,10 @@ const Conversation = ({ conversation, isOnline }) => {
 	const currentUser = useRecoilValue(userAtom);
 	const lastMessage = conversation.lastMessage;
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
-	const colorMode = useColorMode();
+	const { colorMode } = useColorMode();
+	const messagePreview =
+		lastMessage.text.length > 18 ? `${lastMessage.text.substring(0, 18)}...` : lastMessage.text;
 
-	console.log("selectedConverstion", selectedConversation);
 	return (
 		<Flex
 			gap={4}
@@ -41,9 +42,7 @@ const Conversation = ({ conversation, isOnline }) => {
 					mock: conversation.mock,
 				})
 			}
-			bg={
-				selectedConversation?._id === conversation._id ? (colorMode === "dark" ? "gray.500" : "gray.500") : ""
-			}
+			bg={selectedConversation?._id === conversation._id ? (colorMode === "dark" ? "gray.500" : "gray.200") : ""}
 			borderRadius={"md"}
 		>
 			<WrapItem>
@@ -64,18 +63,22 @@ const Conversation = ({ conversation, isOnline }) => {
 					{user.username} 
 					{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
 				</Text>
-				<Text fontSize={"xs"} display={"flex"} alignItems={"center"} gap={1} noOfLines={1}>
+				<Flex fontSize={"xs"} alignItems={"center"} gap={1} minW={0}>
 					{currentUser._id === lastMessage.sender ? (
-						<Box color={lastMessage.seen ? "blue.400" : ""}>
+						<Box as='span' display='inline-flex' color={lastMessage.seen ? "blue.400" : undefined} flexShrink={0}>
 							<BsCheck2All size={16} />
 						</Box>
+					) : null}
+					{messagePreview ? (
+						<Text as='span' fontSize={"xs"} noOfLines={1}>
+							{messagePreview}
+						</Text>
 					) : (
-						""
+						<Box as='span' display='inline-flex' flexShrink={0}>
+							<BsFillImageFill size={16} />
+						</Box>
 					)}
-					{lastMessage.text.length > 18
-						? lastMessage.text.substring(0, 18) + "..."
-						: lastMessage.text || <BsFillImageFill size={16} />}
-				</Text>
+				</Flex>
 			</Stack>
 		</Flex>
 	);

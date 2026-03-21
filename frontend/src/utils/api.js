@@ -1,7 +1,8 @@
 // API configuration for different environments
-const API_BASE_URL = import.meta.env.PROD 
-  ? "https://uni-connect-backend.onrender.com" 
-  : "";
+const REMOTE_BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://uni-connect-backend.onrender.com";
+
+const API_BASE_URL = import.meta.env.PROD ? REMOTE_BACKEND_URL : "";
 
 // Helper function to make API calls
 export const apiCall = async (endpoint, options = {}) => {
@@ -16,9 +17,10 @@ export const apiCall = async (endpoint, options = {}) => {
   return response;
 };
 
-// Export the base URL for Socket.IO connections
-export const SOCKET_URL = import.meta.env.PROD 
-  ? "https://uni-connect-backend.onrender.com" 
-  : "";
+// Socket.IO uses a dedicated URL so local frontend dev can still target a remote backend.
+// Override with VITE_SOCKET_URL=http://localhost:7000 if you want to use a local backend.
+export const SOCKET_URL = import.meta.env.PROD
+  ? REMOTE_BACKEND_URL
+  : import.meta.env.VITE_SOCKET_URL || REMOTE_BACKEND_URL;
 
 export default API_BASE_URL;

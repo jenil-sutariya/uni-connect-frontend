@@ -15,10 +15,7 @@ import {
     IconButton,
     useColorModeValue,
 } from "@chakra-ui/react";
-import io from "socket.io-client";
-import { SOCKET_URL } from "../utils/api";
-
-const socket = io(SOCKET_URL || "http://localhost:7000");
+import { useSocket } from "../context/SocketContext";
 
 const UserSearch = () => {
     const [query, setQuery] = useState("");
@@ -29,6 +26,7 @@ const UserSearch = () => {
     const panelBg = useColorModeValue("white", "gray.dark");
     const headingColor = useColorModeValue("gray.600", "gray.400");
     const dividerColor = useColorModeValue("gray.200", "whiteAlpha.200");
+    const { socket } = useSocket();
 
     // Get the current user's data from localStorage
     useEffect(() => {
@@ -37,12 +35,16 @@ const UserSearch = () => {
         //     console.log(currentUser);
         // }
 
-        socket.on("newUser", (newUser) => {
-            setUsers((prevUsers) => [newUser, ...prevUsers]); // Real-time update
-        });
+        if (!socket) return;
 
-        return () => socket.off("newUser");
-    }, []);
+        const handleNewUser = (newUser) => {
+            setUsers((prevUsers) => [newUser, ...prevUsers]); // Real-time update
+        };
+
+        socket.on("newUser", handleNewUser);
+
+        return () => socket.off("newUser", handleNewUser);
+    }, [socket]);
 
     useEffect(() => {
         const searchQuery = searchParams.get("q") || "";

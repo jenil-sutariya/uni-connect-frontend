@@ -16,18 +16,32 @@ export const SocketContextProvider = ({ children }) => {
 	const user = useRecoilValue(userAtom);
 
 	useEffect(() => {
-		const socket = io(SOCKET_URL || "/", {
+		if (!user?._id) {
+			setSocket(null);
+			setOnlineUsers([]);
+			return;
+		}
+
+		const socketInstance = io(SOCKET_URL, {
 			query: {
-				userId: user?._id,
+				userId: user._id,
 			},
+			withCredentials: true,
+			transports: ["websocket", "polling"],
 		});
 
-		setSocket(socket);
+		setSocket(socketInstance);
 
-		socket.on("getOnlineUsers", (users) => {
+		const handleOnlineUsers = (users) => {
 			setOnlineUsers(users);
-		});
-		return () => socket && socket.close();
+		};
+
+		socketInstance.on("getOnlineUsers", handleOnlineUsers);
+
+		return () => {
+			socketInstance.off("getOnlineUsers", handleOnlineUsers);
+			socketInstance.close();
+		};
 	}, [user?._id]);
 
 	return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
