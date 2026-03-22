@@ -19,6 +19,7 @@ function App() {
 	const { pathname } = useLocation();
 	const isWideLayout =
 		pathname === "/" ||
+		pathname.startsWith("/auth") ||
 		pathname.startsWith("/chat") ||
 		pathname.startsWith("/search") ||
 		pathname.startsWith("/professor");

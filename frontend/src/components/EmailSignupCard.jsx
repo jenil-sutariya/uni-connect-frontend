@@ -27,6 +27,9 @@ export default function EmailSignupCard({ onSwitchToLogin }) {
 	const [loading, setLoading] = useState(false);
 	const setUser = useSetRecoilState(userAtom);
 	const toast = useToast();
+	const subtitleColor = useColorModeValue("gray.600", "gray.300");
+	const primaryButtonBg = useColorModeValue("blue.500", "blue.400");
+	const primaryButtonHoverBg = useColorModeValue("blue.600", "blue.500");
 
 	const [inputs, setInputs] = useState({
 		name: "",
@@ -142,13 +145,13 @@ export default function EmailSignupCard({ onSwitchToLogin }) {
 
 	return (
 		<Flex align={"center"} justify={"center"} w='full' px={{ base: 0, sm: 4 }}>
-			<Stack spacing={{ base: 6, md: 8 }} mx={"auto"} maxW={"lg"} w='full' py={{ base: 6, md: 12 }} px={{ base: 0, sm: 6 }}>
+			<Stack spacing={{ base: 6, md: 8 }} mx={"auto"} maxW={"lg"} w='full' py={{ base: 4, md: 8 }} px={{ base: 0, sm: 2, md: 4 }}>
 				<Stack align={"center"}>
 					<Heading fontSize={{ base: "3xl", md: "4xl" }} textAlign={"center"}>
-						Sign up
+						Create Account
 					</Heading>
-					<Text fontSize={"lg"} color={"gray.600"}>
-						Join UNI Connect
+					<Text fontSize={{ base: "md", md: "lg" }} color={subtitleColor} textAlign={"center"}>
+						Join the CHARUSAT platform for campus updates, discussions, and announcements.
 					</Text>
 				</Stack>
 				<Box 
@@ -180,7 +183,7 @@ export default function EmailSignupCard({ onSwitchToLogin }) {
 								type="email"
 								value={inputs.email}
 								onChange={(e) => setInputs((inputs) => ({ ...inputs, email: e.target.value }))}
-								placeholder="Enter your institute email"
+								placeholder="Enter your CHARUSAT email"
 							/>
 						</FormControl>
 						
@@ -218,10 +221,10 @@ export default function EmailSignupCard({ onSwitchToLogin }) {
 							<Button
 								loadingText="Creating account..."
 								size="lg"
-								bg={useColorModeValue("blue.400", "blue.600")}
+								bg={primaryButtonBg}
 								color={"white"}
 								_hover={{
-									bg: useColorModeValue("blue.500", "blue.700"),
+									bg: primaryButtonHoverBg,
 								}}
 								onClick={handleSignup}
 								isLoading={loading}
@@ -230,6 +233,10 @@ export default function EmailSignupCard({ onSwitchToLogin }) {
 							</Button>
 							
 							<Divider />
+
+							<Text fontSize="sm" color={subtitleColor} textAlign="center">
+								Use your university identity for better department matching and faster onboarding.
+							</Text>
 							
 							<Box display="flex" justifyContent="center" w='full' overflowX='auto' pb={1}>
 								<GoogleLogin
