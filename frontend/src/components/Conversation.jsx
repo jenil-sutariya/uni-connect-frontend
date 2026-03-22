@@ -6,7 +6,6 @@ import {
 	Stack,
 	Text,
 	WrapItem,
-	useColorMode,
 	useColorModeValue,
 } from "@chakra-ui/react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -19,10 +18,15 @@ const Conversation = ({ conversation, isOnline }) => {
 	const currentUser = useRecoilValue(userAtom);
 	const lastMessage = conversation?.lastMessage || {};
 	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
-	const { colorMode } = useColorMode();
 	const lastMessageText = typeof lastMessage.text === "string" ? lastMessage.text : "";
 	const messagePreview =
 		lastMessageText.length > 18 ? `${lastMessageText.substring(0, 18)}...` : lastMessageText;
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const previewColor = useColorModeValue("gray.500", "gray.400");
+	const hoverBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const activeBg = useColorModeValue("blue.50", "whiteAlpha.100");
+	const activeBorder = useColorModeValue("blue.100", "whiteAlpha.200");
+	const borderColor = useColorModeValue("transparent", "whiteAlpha.100");
 
 	if (!user) return null;
 
@@ -30,11 +34,14 @@ const Conversation = ({ conversation, isOnline }) => {
 		<Flex
 			gap={4}
 			alignItems={"center"}
-			p={"1"}
+			p={3}
+			borderRadius='20px'
+			borderWidth='1px'
+			borderColor={selectedConversation?._id === conversation._id ? activeBorder : borderColor}
+			bg={selectedConversation?._id === conversation._id ? activeBg : "transparent"}
 			_hover={{
 				cursor: "pointer",
-				bg: useColorModeValue("gray.600", "blue.900"),
-				color: "white",
+				bg: selectedConversation?._id === conversation._id ? activeBg : hoverBg,
 			}}
 			onClick={() =>
 				setSelectedConversation({
@@ -45,8 +52,6 @@ const Conversation = ({ conversation, isOnline }) => {
 					mock: conversation.mock,
 				})
 			}
-			bg={selectedConversation?._id === conversation._id ? (colorMode === "dark" ? "gray.500" : "gray.200") : ""}
-			borderRadius={"md"}
 		>
 			<WrapItem>
 				<Avatar
@@ -62,11 +67,10 @@ const Conversation = ({ conversation, isOnline }) => {
 			</WrapItem>
 
 			<Stack direction={"column"} fontSize={"sm"} minW={0} flex={1}>
-				<Text fontWeight='700' display={"flex"} alignItems={"center"} noOfLines={1}>
-					{user.username} 
-					{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
+				<Text fontWeight='700' display={"flex"} alignItems={"center"} noOfLines={1} color={titleColor}>
+					{user.username}
 				</Text>
-				<Flex fontSize={"xs"} alignItems={"center"} gap={1} minW={0}>
+				<Flex fontSize={"xs"} alignItems={"center"} gap={1} minW={0} color={previewColor}>
 					{currentUser?._id === lastMessage.sender ? (
 						<Box as='span' display='inline-flex' color={lastMessage.seen ? "blue.400" : undefined} flexShrink={0}>
 							<BsCheck2All size={16} />

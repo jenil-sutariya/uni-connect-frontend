@@ -1,62 +1,53 @@
-import { Box, Container } from "@chakra-ui/react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import UserPage from "./pages/UserPage";
-import PostPage from "./pages/PostPage";
-import Header from "./components/Header";
-import HomePage from "./pages/HomePage";
-import AuthPage from "./pages/AuthPage";
+import { Center, Spinner } from "@chakra-ui/react";
+import { Suspense, lazy } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
-import UpdateProfilePage from "./pages/UpdateProfilePage";
-import CreatePost from "./components/CreatePost";
-import ChatPage from "./pages/ChatPage";
-import UserSearch from "./pages/UserSearch";
-import { SettingsPage } from "./pages/SettingsPage";
-import ProfessorDashboard from "./pages/ProfessorDashboard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AppLayout from "./components/layout/AppLayout";
+import PublicLayout from "./components/layout/PublicLayout";
+
+const HomePage = lazy(() => import("./pages/HomePage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const UserPage = lazy(() => import("./pages/UserPage"));
+const PostPage = lazy(() => import("./pages/PostPage"));
+const UpdateProfilePage = lazy(() => import("./pages/UpdateProfilePage"));
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const UserSearch = lazy(() => import("./pages/UserSearch"));
+const ProfessorDashboard = lazy(() => import("./pages/ProfessorDashboard"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
+
+const RouteLoader = () => (
+	<Center py={16}>
+		<Spinner size='xl' color='brand.400' thickness='4px' />
+	</Center>
+);
+
 function App() {
 	const user = useRecoilValue(userAtom);
-	const { pathname } = useLocation();
-	const isWideLayout =
-		pathname === "/" ||
-		pathname.startsWith("/auth") ||
-		pathname.startsWith("/chat") ||
-		pathname.startsWith("/search") ||
-		pathname.startsWith("/professor");
-	return (
-		<Box position={"relative"} w='full' minH='100vh'>
-			<Container
-				maxW={isWideLayout ? { base: "100%", md: "900px", lg: "1100px" } : { base: "100%", md: "620px" }}
-				px={{ base: 4, sm: 6 }}
-				pb={{ base: 8, md: 12 }}
-			>
-				<Header />
-				<Routes>
-					<Route path='/' element={user ? <HomePage /> : <Navigate to='/auth' />} />
-					<Route path='/auth' element={!user ? <AuthPage /> : <Navigate to='/' />} />
-					<Route path='/update' element={user ? <UpdateProfilePage /> : <Navigate to='/auth' />} />
 
-					<Route
-						path='/:username'
-						element={
-							user ? (
-								<>
-									<UserPage />
-									<CreatePost />
-								</>
-							) : (
-								<UserPage />
-							)
-						}
-					/>
+	return (
+		<Suspense fallback={<RouteLoader />}>
+			<Routes>
+				<Route path='/auth' element={!user ? <AuthPage /> : <Navigate to='/' replace />} />
+
+				<Route element={user ? <AppLayout /> : <Navigate to='/auth?mode=login' replace />}>
+					<Route index element={<HomePage />} />
+					<Route path='/update' element={<UpdateProfilePage />} />
+					<Route path='/chat' element={<ErrorBoundary><ChatPage /></ErrorBoundary>} />
+					<Route path='/search' element={<UserSearch />} />
+					<Route path='/settings' element={<SettingsPage />} />
+					<Route path='/professor' element={user?.role === "professor" ? <ProfessorDashboard /> : <Navigate to='/' replace />} />
+				</Route>
+
+				<Route element={user ? <AppLayout /> : <PublicLayout />}>
+					<Route path='/:username' element={<UserPage />} />
 					<Route path='/:username/post/:pid' element={<PostPage />} />
-					<Route path='/chat' element={user ? <ErrorBoundary><ChatPage /></ErrorBoundary> : <Navigate to={"/auth"} />} />
-					<Route path='/search' element={user ? <UserSearch /> : <Navigate to={"/auth"} />} />
-					<Route path='/settings' element={user ? <SettingsPage /> : <Navigate to={"/auth"} />} />
-					<Route path='/professor' element={user?.role === "professor" ? <ProfessorDashboard /> : <Navigate to={"/"} />} />
-				</Routes>
-			</Container>
-		</Box>
+				</Route>
+
+				<Route path='*' element={<Navigate to={user ? "/" : "/auth"} replace />} />
+			</Routes>
+		</Suspense>
 	);
 }
 

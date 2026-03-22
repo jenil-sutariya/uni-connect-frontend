@@ -1,29 +1,29 @@
 import {
-	Avatar,
-	Box,
-	Flex,
-	Text,
-	Image,
-	Button,
-	Badge,
-	SimpleGrid,
-	useColorModeValue,
 	AlertDialog,
 	AlertDialogBody,
+	AlertDialogContent,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogContent,
 	AlertDialogOverlay,
-	useDisclosure,
+	Avatar,
+	Badge,
+	Box,
+	Button,
+	Flex,
 	Icon,
+	Image,
+	SimpleGrid,
+	Text,
+	useColorModeValue,
+	useDisclosure,
 } from "@chakra-ui/react";
-import { useState, useRef } from "react";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { useRef, useState } from "react";
+import { FaHeart } from "react-icons/fa";
+import { FiHeart } from "react-icons/fi";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
-import { DeleteIcon } from "@chakra-ui/icons";
-import { FiHeart, FiMessageCircle } from "react-icons/fi";
-import { FaHeart } from "react-icons/fa";
 import CommentSection from "./CommentSection";
 
 const formatTimeAgo = (date) => {
@@ -50,14 +50,25 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 	const [liked, setLiked] = useState(announcement.likes?.includes(user?._id));
 	const [likes, setLikes] = useState(announcement.likes?.length || 0);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
+	const mutedColor = useColorModeValue("gray.500", "gray.400");
+	const threadColor = useColorModeValue("blackAlpha.100", "whiteAlpha.200");
+	const imageBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const dialogBg = useColorModeValue("white", "gray.900");
 
-	const getPriorityColor = (priority) => {
+	const getPriorityColorScheme = (priority) => {
 		switch (priority?.toLowerCase()) {
-			case "urgent": return "red";
-			case "high": return "orange";
-			case "medium": return "yellow";
-			case "low": return "green";
-			default: return "gray";
+			case "urgent":
+				return "red";
+			case "high":
+				return "orange";
+			case "medium":
+				return "yellow";
+			case "low":
+				return "green";
+			default:
+				return "gray";
 		}
 	};
 
@@ -120,240 +131,158 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 
 	return (
 		<>
-			{/* Post-style layout */}
-			<Flex gap={{ base: 2, md: 3 }} mb={4} py={5} alignItems='flex-start'>
-				<Flex flexDirection={"column"} alignItems={"center"}>
-					<Avatar
-						size='md'
-						name={announcement.postedBy?.name || announcement.postedBy?.username}
-						src={announcement.postedBy?.profilePic}
-					/>
-					<Box w='1px' h={"full"} bg='gray.light' my={2}></Box>
-					<Box position={"relative"} w={"full"}>
-						{(!announcement.replies || announcement.replies?.length === 0) && <Text textAlign={"center"}>📢</Text>}
-						{announcement.replies?.[0] && (
-							<Avatar
-								size='xs'
-								name='Reply 1'
-								src={announcement.replies[0].userProfilePic}
-								position={"absolute"}
-								top={"0px"}
-								left='15px'
-								padding={"2px"}
-							/>
-						)}
-
-						{announcement.replies?.[1] && (
-							<Avatar
-								size='xs'
-								name='Reply 2'
-								src={announcement.replies[1].userProfilePic}
-								position={"absolute"}
-								bottom={"0px"}
-								right='-5px'
-								padding={"2px"}
-							/>
-						)}
-
-						{announcement.replies?.[2] && (
-							<Avatar
-								size='xs'
-								name='Reply 3'
-								src={announcement.replies[2].userProfilePic}
-								position={"absolute"}
-								bottom={"0px"}
-								left='4px'
-								padding={"2px"}
-							/>
-						)}
-					</Box>
-				</Flex>
-				<Flex flex={1} flexDirection={"column"} gap={2} minW={0}>
-					<Flex
-						justifyContent={"space-between"}
-						w={"full"}
-						gap={2}
-						alignItems={{ base: "flex-start", sm: "center" }}
-						flexWrap='wrap'
-					>
-						<Flex flex={1} minW={0} alignItems={"center"} flexWrap='wrap' gap={2}>
-							<Text
-								fontSize={"sm"}
-								fontWeight={"bold"}
-								noOfLines={1}
-							>
-								{announcement.postedBy?.username}
-							</Text>
-							<Badge
-								colorScheme={getPriorityColor(announcement.priority)}
-								variant="solid"
-								fontSize="xs"
-								px={2}
-								py={1}
-								borderRadius="md"
-							>
-								{announcement.priority?.toUpperCase()}
-							</Badge>
-						</Flex>
-						<Flex gap={{ base: 2, md: 4 }} alignItems={"center"} flexShrink={0}>
-							<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
-								{formatTimeAgo(announcement.createdAt)}
-							</Text>
-							{isProfessorView && user?._id === announcement.postedBy?._id && (
-								<DeleteIcon 
-									size={20} 
-									onClick={onOpen}
-									cursor="pointer"
-									color="red.500"
-									_hover={{ color: "red.600" }}
-								/>
+			<Box className='glass-panel surface-hover px-5 py-5 md:px-6 md:py-6'>
+				<Flex gap={{ base: 4, md: 5 }} alignItems='flex-start'>
+					<Flex flexDirection='column' alignItems='center' gap={3}>
+						<Avatar
+							size='md'
+							name={announcement.postedBy?.name || announcement.postedBy?.username}
+							src={announcement.postedBy?.profilePic}
+						/>
+						<Box w='1px' h='full' bg={threadColor} />
+						<Box position='relative' w='12' h='12'>
+							{(!announcement.replies || announcement.replies?.length === 0) && (
+								<Text textAlign='center' color={mutedColor}>
+									•
+								</Text>
 							)}
-						</Flex>
+							{announcement.replies?.[0] && (
+								<Avatar size='xs' src={announcement.replies[0].userProfilePic} position='absolute' top='1' left='4' />
+							)}
+							{announcement.replies?.[1] && (
+								<Avatar size='xs' src={announcement.replies[1].userProfilePic} position='absolute' bottom='1' right='0' />
+							)}
+							{announcement.replies?.[2] && (
+								<Avatar size='xs' src={announcement.replies[2].userProfilePic} position='absolute' bottom='1' left='1' />
+							)}
+						</Box>
 					</Flex>
 
-					{/* Title */}
-					<Text fontSize={"md"} fontWeight={"semibold"} color={useColorModeValue("gray.800", "whiteAlpha.900")} wordBreak='break-word'>
-						{announcement.title}
-					</Text>
+					<Flex flex={1} flexDirection='column' gap={4} minW={0}>
+						<Flex justifyContent='space-between' w='full' gap={3} alignItems={{ base: "flex-start", sm: "center" }} flexWrap='wrap'>
+							<Flex flex={1} minW={0} alignItems='center' flexWrap='wrap' gap={2}>
+								<Text className='font-display text-base font-semibold' color={titleColor} noOfLines={1}>
+									{announcement.postedBy?.username}
+								</Text>
+								<Badge colorScheme={getPriorityColorScheme(announcement.priority)} borderRadius='full' px={3} py={1}>
+									{announcement.priority?.toUpperCase()}
+								</Badge>
+								<Badge colorScheme='blue' variant='subtle' borderRadius='full' px={3} py={1}>
+									Announcement
+								</Badge>
+							</Flex>
 
-					{/* Content */}
-					<Text fontSize={"sm"} wordBreak='break-word'>
-						{announcement.content}
-					</Text>
+							<Flex gap={{ base: 2, md: 3 }} alignItems='center' flexShrink={0}>
+								<Text fontSize='xs' whiteSpace='nowrap' color={mutedColor}>
+									{formatTimeAgo(announcement.createdAt)}
+								</Text>
+								{isProfessorView && user?._id === announcement.postedBy?._id && (
+									<Box as='button' onClick={onOpen} className='danger-soft-button !p-2'>
+										<DeleteIcon boxSize={3.5} />
+									</Box>
+								)}
+							</Flex>
+						</Flex>
 
-					{/* Photos - Post-style display */}
-					{announcement.photos && Array.isArray(announcement.photos) && announcement.photos.length > 0 && (
 						<Box>
-							{announcement.photos.length === 1 ? (
-								// Single photo - full width like posts
-								<Box 
-									borderRadius={6} 
-									overflow="hidden" 
-									border="1px solid" 
-									borderColor={"gray.light"}
-								>
-									<Image
-										src={announcement.photos[0]}
-										alt="Announcement photo"
-										w="full"
-										onError={(e) => {
-											console.log("Image failed to load:", announcement.photos[0]);
-											e.target.style.display = 'none';
-										}}
-									/>
-								</Box>
-							) : (
-								// Multiple photos - grid layout
-								<Box>
-									<Text fontSize="sm" color="gray.500" mb={2}>
-										📸 {announcement.photos.length} photos
-									</Text>
-									<SimpleGrid 
-										columns={{ base: 1, sm: 2, md: announcement.photos.length === 3 ? 3 : 2 }} 
-										spacing={2}
-									>
-										{announcement.photos.slice(0, 4).map((photo, index) => (
-											<Box key={index} position="relative">
-												<Box 
-													borderRadius={6} 
-													overflow="hidden" 
-													border="1px solid" 
-													borderColor={"gray.light"}
-												>
+							<Text className='font-display text-xl font-semibold' color={titleColor} wordBreak='break-word'>
+								{announcement.title}
+							</Text>
+							<Text mt={3} fontSize='sm' color={bodyColor} lineHeight='1.75' wordBreak='break-word'>
+								{announcement.content}
+							</Text>
+						</Box>
+
+						{announcement.photos && Array.isArray(announcement.photos) && announcement.photos.length > 0 && (
+							<Box>
+								{announcement.photos.length === 1 ? (
+									<Box borderRadius='24px' overflow='hidden' borderWidth='1px' borderColor={imageBorder}>
+										<Image
+											src={announcement.photos[0]}
+											alt='Announcement photo'
+											w='full'
+											maxH='460px'
+											objectFit='cover'
+											onError={(e) => {
+												e.target.style.display = "none";
+											}}
+										/>
+									</Box>
+								) : (
+									<Box>
+										<Text fontSize='sm' color={mutedColor} mb={3}>
+											{announcement.photos.length} supporting images
+										</Text>
+										<SimpleGrid columns={{ base: 1, sm: 2, md: announcement.photos.length === 3 ? 3 : 2 }} spacing={3}>
+											{announcement.photos.slice(0, 4).map((photo, index) => (
+												<Box key={index} position='relative' borderRadius='20px' overflow='hidden' borderWidth='1px' borderColor={imageBorder}>
 													<Image
 														src={photo}
 														alt={`Announcement photo ${index + 1}`}
-														w="full"
-														h={{ base: "220px", sm: "150px" }}
-														objectFit="cover"
+														w='full'
+														h={{ base: "220px", sm: "180px" }}
+														objectFit='cover'
 														onError={(e) => {
-															console.log("Image failed to load:", photo);
-															e.target.style.display = 'none';
+															e.target.style.display = "none";
 														}}
 													/>
+													{index === 3 && announcement.photos.length > 4 && (
+														<Flex
+															position='absolute'
+															top={0}
+															left={0}
+															right={0}
+															bottom={0}
+															bg='blackAlpha.700'
+															align='center'
+															justify='center'
+															color='white'
+															fontSize='lg'
+															fontWeight='bold'
+														>
+															+{announcement.photos.length - 4} more
+														</Flex>
+													)}
 												</Box>
-												{/* Show "+X more" overlay for 4th photo when more than 4 */}
-												{index === 3 && announcement.photos.length > 4 && (
-													<Flex
-														position="absolute"
-														top={0}
-														left={0}
-														right={0}
-														bottom={0}
-														bg="blackAlpha.700"
-														borderRadius={6}
-														align="center"
-														justify="center"
-														color="white"
-														fontSize="lg"
-														fontWeight="bold"
-													>
-														+{announcement.photos.length - 4} more
-													</Flex>
-												)}
-											</Box>
-										))}
-									</SimpleGrid>
-								</Box>
-							)}
-						</Box>
-					)}
+											))}
+										</SimpleGrid>
+									</Box>
+								)}
+							</Box>
+						)}
 
-					{/* Targeting Info */}
-					<Flex gap={3} my={1} fontSize="xs" color="gray.500" flexWrap='wrap' direction={{ base: "column", sm: "row" }}>
-						<Text>📍 {announcement.targetDepartments?.join(', ')}</Text>
-						<Text>🎓 {announcement.targetBatches?.join(', ')}</Text>
-					</Flex>
+						<Flex gap={2} my={1} fontSize='xs' flexWrap='wrap'>
+							<Box className='metric-pill'>Departments: {announcement.targetDepartments?.join(", ")}</Box>
+							<Box className='metric-pill'>Batches: {announcement.targetBatches?.join(", ")}</Box>
+						</Flex>
 
-					{/* Actions - Post style */}
-					<Flex gap={4} my={2}>
 						<Button
-							variant="ghost"
-							size="sm"
-							leftIcon={
-								<Icon as={liked ? FaHeart : FiHeart} 
-									color={liked ? "red.500" : "gray.500"} 
-								/>
-							}
+							variant='ghost'
+							alignSelf='flex-start'
+							leftIcon={<Icon as={liked ? FaHeart : FiHeart} color={liked ? "red.400" : mutedColor} />}
 							onClick={handleLike}
-							fontSize="sm"
-							px={2}
-							py={1}
-							h="auto"
-							color={liked ? "red.500" : "gray.500"}
-							_hover={{ 
-								color: liked ? "red.600" : "red.400",
-								bg: "transparent"
-							}}
+							color={liked ? useColorModeValue("red.600", "red.200") : bodyColor}
+							_hover={{ bg: useColorModeValue("blackAlpha.50", "whiteAlpha.100") }}
+							borderRadius='full'
 						>
-							{likes}
+							{likes} likes
 						</Button>
+
+						<CommentSection
+							comments={announcement.replies || []}
+							type='announcement'
+							targetId={announcement._id}
+							onAddComment={() => {}}
+							onDeleteComment={() => {}}
+						/>
 					</Flex>
-
-					{/* Comment Section */}
-					<CommentSection
-						comments={announcement.replies || []}
-						type="announcement"
-						targetId={announcement._id}
-						onAddComment={(newComment) => {
-							// Update the announcement replies in parent component if needed
-						}}
-						onDeleteComment={(commentId) => {
-							// Handle comment deletion in parent component if needed
-						}}
-					/>
 				</Flex>
-			</Flex>
+			</Box>
 
-			{/* Delete confirmation dialog */}
-			<AlertDialog
-				isOpen={isOpen}
-				leastDestructiveRef={cancelRef}
-				onClose={onClose}
-			>
-				<AlertDialogOverlay>
-					<AlertDialogContent>
-						<AlertDialogHeader fontSize="lg" fontWeight="bold">
+			<AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+				<AlertDialogOverlay backdropFilter='blur(6px)'>
+					<AlertDialogContent bg={dialogBg} borderWidth='1px' borderColor={useColorModeValue("blackAlpha.100", "whiteAlpha.100")} borderRadius='24px'>
+						<AlertDialogHeader fontSize='lg' fontWeight='bold'>
 							Delete Announcement
 						</AlertDialogHeader>
 
@@ -362,10 +291,10 @@ const AnnouncementCard = ({ announcement, onDelete, isProfessorView = false }) =
 						</AlertDialogBody>
 
 						<AlertDialogFooter>
-							<Button ref={cancelRef} onClick={onClose}>
+							<Button ref={cancelRef} onClick={onClose} variant='ghost'>
 								Cancel
 							</Button>
-							<Button colorScheme="red" onClick={handleDelete} ml={3} isLoading={isDeleting}>
+							<Button colorScheme='red' onClick={handleDelete} ml={3} isLoading={isDeleting}>
 								Delete
 							</Button>
 						</AlertDialogFooter>

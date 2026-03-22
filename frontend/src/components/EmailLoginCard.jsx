@@ -28,8 +28,12 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 	const setUser = useSetRecoilState(userAtom);
 	const toast = useToast();
 	const subtitleColor = useColorModeValue("gray.600", "gray.300");
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
 	const primaryButtonBg = useColorModeValue("blue.500", "blue.400");
 	const primaryButtonHoverBg = useColorModeValue("blue.600", "blue.500");
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const fieldText = useColorModeValue("gray.800", "whiteAlpha.900");
 
 	const [inputs, setInputs] = useState({
 		username: "",
@@ -85,13 +89,7 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 	const handleGoogleLogin = async (credentialResponse) => {
 		try {
 			const decoded = jwtDecode(credentialResponse.credential);
-			
-			console.log("Google login attempt:", {
-				email: decoded.email,
-				name: decoded.name,
-				picture: decoded.picture
-			});
-			
+
 			const res = await fetch("/api/users/google-signup", {
 				method: "POST",
 				headers: {
@@ -143,7 +141,7 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 		<Flex align={"center"} justify={"center"} w='full' px={{ base: 0, sm: 4 }}>
 			<Stack spacing={{ base: 6, md: 8 }} mx={"auto"} maxW={"lg"} w='full' py={{ base: 4, md: 8 }} px={{ base: 0, sm: 2, md: 4 }}>
 				<Stack align={"center"}>
-					<Heading fontSize={{ base: "3xl", md: "4xl" }} textAlign={"center"}>
+					<Heading fontSize={{ base: "3xl", md: "4xl" }} textAlign={"center"} className='!font-display' color={titleColor}>
 						Welcome Back
 					</Heading>
 					<Text fontSize={{ base: "md", md: "lg" }} color={subtitleColor} textAlign={"center"}>
@@ -161,6 +159,7 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 						sm: "400px",
 					}}
 					mx='auto'
+					className='glass-panel-strong'
 				>
 					<Stack spacing={4}>
 						<FormControl isRequired>
@@ -170,6 +169,11 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 								value={inputs.username}
 								onChange={(e) => setInputs((inputs) => ({ ...inputs, username: e.target.value }))}
 								placeholder="Enter your username"
+								borderRadius='16px'
+								bg={fieldBg}
+								borderColor={fieldBorder}
+								color={fieldText}
+								_placeholder={{ color: subtitleColor }}
 							/>
 						</FormControl>
 						
@@ -181,11 +185,17 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 									value={inputs.password}
 									onChange={(e) => setInputs((inputs) => ({ ...inputs, password: e.target.value }))}
 									placeholder="Enter your password"
+									borderRadius='16px'
+									bg={fieldBg}
+									borderColor={fieldBorder}
+									color={fieldText}
+									_placeholder={{ color: subtitleColor }}
 								/>
 								<InputRightElement h={"full"}>
 									<Button
 										variant={"ghost"}
 										onClick={() => setShowPassword((showPassword) => !showPassword)}
+										className='!rounded-full'
 									>
 										{showPassword ? <ViewIcon /> : <ViewOffIcon />}
 									</Button>
@@ -204,6 +214,7 @@ export default function EmailLoginCard({ onSwitchToSignup }) {
 								}}
 								onClick={handleLogin}
 								isLoading={loading}
+								className='!rounded-full !shadow-lg'
 							>
 								Login
 							</Button>

@@ -1,4 +1,5 @@
 import {
+	Box,
 	Button,
 	Flex,
 	FormControl,
@@ -9,9 +10,11 @@ import {
 	useColorModeValue,
 	Avatar,
 	Center,
+	Text,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
 import userAtom from "../atoms/userAtom";
 import usePreviewImg from "../hooks/usePreviewImg";
 import useShowToast from "../hooks/useShowToast";
@@ -29,8 +32,13 @@ export default function UpdateProfilePage() {
 	const [updating, setUpdating] = useState(false);
 
 	const showToast = useShowToast();
+	const navigate = useNavigate();
 
 	const { handleImageChange, imgUrl } = usePreviewImg();
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -64,22 +72,29 @@ export default function UpdateProfilePage() {
 				<Stack
 					spacing={4}
 					w={"full"}
-					maxW={"md"}
+					maxW={"2xl"}
 					bg={useColorModeValue("white", "gray.dark")}
 					rounded={"xl"}
 					boxShadow={"lg"}
-					p={6}
+					p={{ base: 5, md: 8 }}
+					className='glass-panel-strong'
 				>
-					<Heading lineHeight={1.1} fontSize={{ base: "2xl", sm: "3xl" }}>
+					<Box>
+						<Text className='section-eyebrow mb-2'>Profile</Text>
+						<Heading lineHeight={1.1} fontSize={{ base: "2xl", sm: "3xl" }} color={titleColor} className='font-display'>
 						User Profile Edit
-					</Heading>
+						</Heading>
+						<Text mt={2} color={bodyColor}>
+							Update your public info so your CHARUSAT profile looks clean and complete.
+						</Text>
+					</Box>
 					<FormControl id='userName'>
 						<Stack direction={["column", "row"]} spacing={6}>
 							<Center>
-								<Avatar size='xl' boxShadow={"md"} src={imgUrl || user.profilePic} />
+								<Avatar size='2xl' boxShadow={"md"} src={imgUrl || user.profilePic} />
 							</Center>
 							<Center w='full'>
-								<Button w='full' onClick={() => fileRef.current.click()}>
+								<Button w='full' onClick={() => fileRef.current.click()} variant='unstyled' className='soft-button !h-11'>
 									Change Avatar
 								</Button>
 								<Input type='file' hidden ref={fileRef} onChange={handleImageChange} />
@@ -94,6 +109,8 @@ export default function UpdateProfilePage() {
 							onChange={(e) => setInputs({ ...inputs, name: e.target.value })}
 							_placeholder={{ color: "gray.500" }}
 							type='text'
+							bg={fieldBg}
+							borderColor={fieldBorder}
 						/>
 					</FormControl>
 					<FormControl>
@@ -104,6 +121,8 @@ export default function UpdateProfilePage() {
 							onChange={(e) => setInputs({ ...inputs, username: e.target.value })}
 							_placeholder={{ color: "gray.500" }}
 							type='text'
+							bg={fieldBg}
+							borderColor={fieldBorder}
 						/>
 					</FormControl>
 					<FormControl>
@@ -114,6 +133,8 @@ export default function UpdateProfilePage() {
 							onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
 							_placeholder={{ color: "gray.500" }}
 							type='email'
+							bg={fieldBg}
+							borderColor={fieldBorder}
 						/>
 					</FormControl>
 					<FormControl>
@@ -124,6 +145,8 @@ export default function UpdateProfilePage() {
 							onChange={(e) => setInputs({ ...inputs, bio: e.target.value })}
 							_placeholder={{ color: "gray.500" }}
 							type='text'
+							bg={fieldBg}
+							borderColor={fieldBorder}
 						/>
 					</FormControl>
 					<FormControl>
@@ -134,28 +157,27 @@ export default function UpdateProfilePage() {
 							onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
 							_placeholder={{ color: "gray.500" }}
 							type='password'
+							bg={fieldBg}
+							borderColor={fieldBorder}
 						/>
 					</FormControl>
 					<Stack spacing={6} direction={["column", "row"]}>
 						<Button
-							bg={"red.400"}
-							color={"white"}
 							w='full'
-							_hover={{
-								bg: "red.500",
-							}}
+							type='button'
+							onClick={() => navigate(-1)}
+							variant='unstyled'
+							className='danger-soft-button !h-11'
 						>
 							Cancel
 						</Button>
 						<Button
-							bg={"green.400"}
-							color={"white"}
 							w='full'
-							_hover={{
-								bg: "green.500",
-							}}
 							type='submit'
 							isLoading={updating}
+							colorScheme='blue'
+							borderRadius='full'
+							h='44px'
 						>
 							Submit
 						</Button>

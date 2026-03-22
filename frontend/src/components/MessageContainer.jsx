@@ -1,22 +1,29 @@
-import { Avatar, Divider, Flex, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
+import { Avatar, Button, Divider, Flex, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useEffect, useRef, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext.jsx";
 import messageSound from "../assets/sounds/message.mp3";
+
 const MessageContainer = () => {
 	const showToast = useShowToast();
 	const selectedConversation = useRecoilValue(selectedConversationAtom);
+	const resetSelectedConversation = useResetRecoilState(selectedConversationAtom);
 	const [loadingMessages, setLoadingMessages] = useState(true);
 	const [messages, setMessages] = useState([]);
 	const currentUser = useRecoilValue(userAtom);
 	const { socket } = useSocket();
 	const setConversations = useSetRecoilState(conversationsAtom);
 	const messageEndRef = useRef(null);
+	const panelBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const mutedText = useColorModeValue("gray.500", "gray.400");
+	const skeletonStart = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const skeletonEnd = useColorModeValue("blackAlpha.200", "whiteAlpha.200");
 
 	useEffect(() => {
 		if (!socket) return;
@@ -122,24 +129,40 @@ const MessageContainer = () => {
 		<Flex
 			flex={1}
 			w='full'
-			minH={{ base: "60vh", md: "500px" }}
-			maxH={{ lg: "72vh" }}
-			bg={useColorModeValue("gray.200", "gray.dark")}
+			minH={{ base: "calc(100vh - 170px)", md: "520px" }}
+			maxH={{ lg: "calc(100vh - 190px)" }}
 			borderRadius={"xl"}
 			p={{ base: 3, md: 4 }}
 			flexDirection={"column"}
 			overflow='hidden'
+			className='glass-panel-strong'
 		>
-			{/* Message header */}
-			<Flex w={"full"} minH={12} alignItems={"center"} gap={2}>
-				<Avatar src={selectedConversation.userProfilePic} size={"sm"} />
-				<Text display={"flex"} alignItems={"center"} noOfLines={1}>
-					{selectedConversation.username} 
-					{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
+			<Flex w={"full"} minH={12} alignItems={"center"} justify='space-between' gap={3} pb={3}>
+				<Flex align='center' gap={3} minW={0}>
+					<Button
+						display={{ base: "inline-flex", lg: "none" }}
+						variant='unstyled'
+						className='app-button app-button-ghost !h-9 !px-4'
+						onClick={() => resetSelectedConversation()}
+					>
+						Back
+					</Button>
+					<Avatar src={selectedConversation.userProfilePic} size={"sm"} />
+					<Flex direction='column' minW={0}>
+						<Text display={"flex"} alignItems={"center"} noOfLines={1} fontWeight='semibold' color={titleColor}>
+							{selectedConversation.username}
+						</Text>
+						<Text fontSize='xs' color={mutedText}>
+							Direct conversation
+						</Text>
+					</Flex>
+				</Flex>
+				<Text fontSize='xs' color={mutedText} display={{ base: "none", md: "block" }}>
+					Seen status updates live
 				</Text>
 			</Flex>
 
-			<Divider />
+			<Divider borderColor={panelBorder} />
 
 			<Flex flex={1} flexDir={"column"} gap={4} my={4} pr={1} overflowY={"auto"}>
 				{loadingMessages &&
@@ -152,13 +175,13 @@ const MessageContainer = () => {
 							borderRadius={"md"}
 							alignSelf={i % 2 === 0 ? "flex-start" : "flex-end"}
 						>
-							{i % 2 === 0 && <SkeletonCircle size={7} />}
+							{i % 2 === 0 && <SkeletonCircle size={7} startColor={skeletonStart} endColor={skeletonEnd} />}
 							<Flex flexDir={"column"} gap={2}>
-								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
-								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
-								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} startColor={skeletonStart} endColor={skeletonEnd} />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} startColor={skeletonStart} endColor={skeletonEnd} />
+								<Skeleton h='8px' w={{ base: "160px", sm: "250px" }} startColor={skeletonStart} endColor={skeletonEnd} />
 							</Flex>
-							{i % 2 !== 0 && <SkeletonCircle size={7} />}
+							{i % 2 !== 0 && <SkeletonCircle size={7} startColor={skeletonStart} endColor={skeletonEnd} />}
 						</Flex>
 					))}
 

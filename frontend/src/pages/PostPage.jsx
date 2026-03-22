@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Divider, Flex, Image, Spinner, Text } from "@chakra-ui/react";
+import { Avatar, Box, Button, Divider, Flex, Image, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import Actions from "../components/Actions";
 import { useEffect } from "react";
 import CommentSection from "../components/CommentSection";
@@ -18,6 +18,11 @@ const PostPage = () => {
 	const { pid } = useParams();
 	const currentUser = useRecoilValue(userAtom);
 	const navigate = useNavigate();
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
+	const mutedColor = useColorModeValue("gray.500", "gray.400");
+	const imageBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const dividerColor = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
 
 	const currentPost = posts[0];
 
@@ -67,10 +72,8 @@ const PostPage = () => {
 	}
 
 	if (!currentPost) return null;
-	console.log("currentPost", currentPost);
-
 	return (
-		<>
+		<Box className='glass-panel-strong px-5 py-5 md:px-7 md:py-7'>
 			<Flex
 				justifyContent={"space-between"}
 				alignItems={{ base: "flex-start", sm: "center" }}
@@ -79,30 +82,39 @@ const PostPage = () => {
 			>
 				<Flex w={"full"} alignItems={"center"} gap={3} minW={0}>
 					<Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' />
-					<Flex minW={0}>
-						<Text fontSize={"sm"} fontWeight={"bold"} noOfLines={1}>
+					<Flex minW={0} direction='column'>
+						<Text fontSize={"sm"} fontWeight={"bold"} noOfLines={1} color={titleColor}>
+							{user.name}
+						</Text>
+						<Text fontSize='xs' color={mutedColor} noOfLines={1}>
 							{user.username}
 						</Text>
-						{/* <Image src='/verified.png' w='4' h={4} ml={4} /> */}
 					</Flex>
 				</Flex>
 				<Flex gap={{ base: 2, md: 4 }} alignItems={"center"}>
-					<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
+					<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={mutedColor}>
 						{formatDistanceToNow(new Date(currentPost.createdAt))} ago
 					</Text>
 
 					{currentUser?._id === user._id && (
-						<DeleteIcon size={20} cursor={"pointer"} onClick={handleDeletePost} />
+						<Button
+							variant='unstyled'
+							leftIcon={<DeleteIcon />}
+							onClick={handleDeletePost}
+							className='danger-soft-button !h-10 !px-4'
+						>
+							Delete
+						</Button>
 					)}
 				</Flex>
 			</Flex>
 
-			<Text my={3} wordBreak='break-word'>
+			<Text my={4} wordBreak='break-word' color={bodyColor} fontSize={{ base: "sm", md: "md" }}>
 				{currentPost.text}
 			</Text>
 
 			{currentPost.img && (
-				<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+				<Box borderRadius='20px' overflow={"hidden"} border={"1px solid"} borderColor={imageBorder}>
 					<Image src={currentPost.img} w={"full"} />
 				</Box>
 			)}
@@ -111,19 +123,8 @@ const PostPage = () => {
 				<Actions post={currentPost} />
 			</Flex>
 
-			<Divider my={4} />
-
-			{/* <Flex justifyContent={"space-between"}>
-				<Flex gap={2} alignItems={"center"}>
-					<Text fontSize={"2xl"}>👋</Text>
-					<Text color={"gray.light"}>Get the app to like, reply and post.</Text>
-				</Flex>
-				<Button>Get</Button>
-			</Flex> */}
-
-			<Divider my={4} />
+			<Divider my={5} borderColor={dividerColor} />
 			
-			{/* Comment Section */}
 			<CommentSection
 				comments={currentPost.replies}
 				onAddComment={(newComment) => {
@@ -148,7 +149,7 @@ const PostPage = () => {
 				targetId={currentPost._id}
 				showByDefault={true}
 			/>
-		</>
+		</Box>
 	);
 };
 

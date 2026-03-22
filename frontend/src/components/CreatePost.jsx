@@ -25,7 +25,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
 import postsAtom from "../atoms/postsAtom";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 const MAX_CHAR = 500;
 
@@ -40,6 +40,17 @@ const CreatePost = () => {
 	const [loading, setLoading] = useState(false);
 	const [posts, setPosts] = useRecoilState(postsAtom);
 	const { username } = useParams();
+	const { pathname } = useLocation();
+	const launcherBg = useColorModeValue("blue.500", "blue.300");
+	const launcherHoverBg = useColorModeValue("blue.600", "blue.400");
+	const launcherColor = useColorModeValue("white", "gray.900");
+	const modalBg = useColorModeValue("whiteAlpha.900", "gray.900");
+	const modalBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const textColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const mutedText = useColorModeValue("gray.500", "gray.400");
+	const closeButtonBg = useColorModeValue("whiteAlpha.800", "blackAlpha.600");
 
 	const handleTextChange = (e) => {
 		const inputText = e.target.value;
@@ -71,7 +82,8 @@ const CreatePost = () => {
 				return;
 			}
 			showToast("Success", "Post created successfully", "success");
-			if (username === user.username) {
+			const isOwnProfileRoute = username === user.username;
+			if (pathname === "/" || isOwnProfileRoute) {
 				setPosts([data, ...posts]);
 			}
 			onClose();
@@ -88,11 +100,15 @@ const CreatePost = () => {
 		<>
 			<Button
 				position={"fixed"}
-				bottom={10}
-				right={5}
-				bg={useColorModeValue("gray.300", "gray.dark")}
+				bottom={{ base: 6, md: 10 }}
+				right={{ base: 4, md: 6 }}
+				bg={launcherBg}
+				color={launcherColor}
+				_hover={{ bg: launcherHoverBg, transform: "translateY(-2px)" }}
 				onClick={onOpen}
 				size={{ base: "sm", sm: "md" }}
+				boxShadow='xl'
+				className='!h-14 !w-14 !rounded-2xl transition'
 			>
 				<AddIcon />
 			</Button>
@@ -100,7 +116,7 @@ const CreatePost = () => {
 			<Modal isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
 
-				<ModalContent>
+				<ModalContent bg={modalBg} borderWidth='1px' borderColor={modalBorder} className='modal-surface'>
 					<ModalHeader>Create Post</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody pb={6}>
@@ -109,15 +125,21 @@ const CreatePost = () => {
 								placeholder='Post content goes here..'
 								onChange={handleTextChange}
 								value={postText}
+								minH='160px'
+								borderRadius='24px'
+								bg={fieldBg}
+								borderColor={fieldBorder}
+								color={textColor}
+								_placeholder={{ color: mutedText }}
 							/>
-							<Text fontSize='xs' fontWeight='bold' textAlign={"right"} m={"1"} color={"gray.800"}>
+							<Text fontSize='xs' fontWeight='semibold' textAlign={"right"} m={"1"} color={mutedText}>
 								{remainingChar}/{MAX_CHAR}
 							</Text>
 
 							<Input type='file' hidden ref={imageRef} onChange={handleImageChange} />
 
 							<BsFillImageFill
-								style={{ marginLeft: "5px", cursor: "pointer" }}
+								style={{ marginLeft: "5px", cursor: "pointer", color: mutedText }}
 								size={16}
 								onClick={() => imageRef.current.click()}
 							/>
@@ -130,7 +152,7 @@ const CreatePost = () => {
 									onClick={() => {
 										setImgUrl("");
 									}}
-									bg={"gray.800"}
+									bg={closeButtonBg}
 									position={"absolute"}
 									top={2}
 									right={2}
@@ -140,7 +162,7 @@ const CreatePost = () => {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button colorScheme='blue' mr={3} onClick={handleCreatePost} isLoading={loading}>
+						<Button colorScheme='blue' mr={3} onClick={handleCreatePost} isLoading={loading} className='!rounded-full !px-6'>
 							Post
 						</Button>
 					</ModalFooter>

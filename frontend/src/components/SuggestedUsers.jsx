@@ -1,4 +1,4 @@
-import { Box, Flex, Skeleton, SkeletonCircle, Text } from "@chakra-ui/react";
+import { Box, Flex, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import SuggestedUser from "./SuggestedUser";
 import useShowToast from "../hooks/useShowToast";
@@ -7,6 +7,8 @@ const SuggestedUsers = () => {
 	const [loading, setLoading] = useState(true);
 	const [suggestedUsers, setSuggestedUsers] = useState([]);
 	const showToast = useShowToast();
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
 
 	useEffect(() => {
 		const getSuggestedUsers = async () => {
@@ -32,56 +34,49 @@ const SuggestedUsers = () => {
 	}, [showToast]);
 
 	return (
-		<>
-			<Text mb={4} fontWeight={"bold"}>
-				Suggested Users
+		<Box className='glass-panel-strong sticky top-24 px-4 py-4 md:px-5 md:py-5'>
+			<Text className='section-eyebrow mb-2'>Suggested</Text>
+			<Text className='font-display text-lg font-semibold md:text-xl' color={titleColor}>
+				People you may know
 			</Text>
-			<Flex direction={"column"} gap={4}>
-				{!loading && Array.isArray(suggestedUsers) && suggestedUsers.length > 0 && suggestedUsers.map((user) => <SuggestedUser key={user._id} user={user} />)}
+			<Text mt={2} color={bodyColor} fontSize='sm' lineHeight='1.6'>
+				Discover classmates, collaborators, and faculty members.
+			</Text>
+
+			<Flex direction='column' gap={3} mt={4}>
+				{!loading &&
+					Array.isArray(suggestedUsers) &&
+					suggestedUsers.length > 0 &&
+					suggestedUsers.map((user) => <SuggestedUser key={user._id} user={user} />)}
+
 				{!loading && Array.isArray(suggestedUsers) && suggestedUsers.length === 0 && (
-					<Text color="gray.500" fontSize="sm" textAlign="center" py={4}>
-						No suggested users at the moment
-					</Text>
+					<Box className='glass-panel px-4 py-6 text-center'>
+						<Text color={bodyColor} fontSize='sm'>
+							No suggested users at the moment
+						</Text>
+					</Box>
 				)}
+
 				{loading &&
 					[0, 1, 2, 3, 4].map((_, idx) => (
-						<Flex key={idx} gap={2} alignItems={"center"} p={"1"} borderRadius={"md"}>
-							{/* avatar skeleton */}
-							<Box>
-								<SkeletonCircle size={"10"} />
-							</Box>
-							{/* username and fullname skeleton */}
-							<Flex w={"full"} flexDirection={"column"} gap={2}>
-								<Skeleton h={"8px"} w={"80px"} />
-								<Skeleton h={"8px"} w={"90px"} />
-							</Flex>
-							{/* follow button skeleton */}
-							<Flex>
-								<Skeleton h={"20px"} w={"60px"} />
+						<Flex
+							key={idx}
+							gap={3}
+							alignItems='center'
+							p={3}
+							borderRadius='20px'
+							className='glass-panel'
+						>
+							<SkeletonCircle size='10' startColor='blackAlpha.100' endColor='blackAlpha.200' _dark={{ startColor: "whiteAlpha.100", endColor: "whiteAlpha.200" }} />
+							<Flex w='full' flexDirection='column' gap={2}>
+								<Skeleton h='8px' w='90px' startColor='blackAlpha.100' endColor='blackAlpha.200' _dark={{ startColor: "whiteAlpha.100", endColor: "whiteAlpha.200" }} />
+								<Skeleton h='8px' w='110px' startColor='blackAlpha.100' endColor='blackAlpha.200' _dark={{ startColor: "whiteAlpha.100", endColor: "whiteAlpha.200" }} />
 							</Flex>
 						</Flex>
 					))}
 			</Flex>
-		</>
+		</Box>
 	);
 };
 
 export default SuggestedUsers;
-
-// Loading skeletons for suggested users, if u want to copy and paste as shown in the tutorial
-
-// <Flex key={idx} gap={2} alignItems={"center"} p={"1"} borderRadius={"md"}>
-// 							{/* avatar skeleton */}
-// 							<Box>
-// 								<SkeletonCircle size={"10"} />
-// 							</Box>
-// 							{/* username and fullname skeleton */}
-// 							<Flex w={"full"} flexDirection={"column"} gap={2}>
-// 								<Skeleton h={"8px"} w={"80px"} />
-// 								<Skeleton h={"8px"} w={"90px"} />
-// 							</Flex>
-// 							{/* follow button skeleton */}
-// 							<Flex>
-// 								<Skeleton h={"20px"} w={"60px"} />
-// 							</Flex>
-// 						</Flex>

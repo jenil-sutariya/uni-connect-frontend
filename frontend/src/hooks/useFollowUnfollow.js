@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useShowToast from "./useShowToast";
 import userAtom from "../atoms/userAtom";
 import { useRecoilValue } from "recoil";
@@ -8,6 +8,10 @@ const useFollowUnfollow = (user) => {
 	const [following, setFollowing] = useState(user.followers.includes(currentUser?._id));
 	const [updating, setUpdating] = useState(false);
 	const showToast = useShowToast();
+
+	useEffect(() => {
+		setFollowing(user.followers.includes(currentUser?._id));
+	}, [currentUser?._id, user.followers]);
 
 	const handleFollowUnfollow = async () => {
 		if (!currentUser) {
@@ -38,8 +42,6 @@ const useFollowUnfollow = (user) => {
 				user.followers.push(currentUser?._id); // simulate adding to followers
 			}
 			setFollowing(!following);
-
-			console.log(data);
 		} catch (error) {
 			showToast("Error", error, "error");
 		} finally {

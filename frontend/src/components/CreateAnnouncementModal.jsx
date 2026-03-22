@@ -35,6 +35,11 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 	const [loading, setLoading] = useState(false);
 	const showToast = useShowToast();
 	const bgColor = useColorModeValue("gray.50", "gray.700");
+	const panelBg = useColorModeValue("whiteAlpha.900", "gray.900");
+	const panelBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const mutedText = useColorModeValue("gray.500", "gray.400");
 	const imageRef = useRef(null);
 	const [photos, setPhotos] = useState([]);
 
@@ -117,8 +122,6 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 			return;
 		}
 
-		console.log(`Processing ${files.length} selected files...`);
-
 		files.forEach((file, index) => {
 			if (file && file.type.startsWith("image/")) {
 				// Check file size (max 5MB per image)
@@ -130,8 +133,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 				const reader = new FileReader();
 				reader.onloadend = () => {
 					const base64String = reader.result;
-					console.log(`Processed image ${index + 1}: ${file.name}, size: ${file.size} bytes`);
-					
+
 					setPhotos(prev => [...prev, {
 						id: Date.now() + Math.random() + index,
 						file: file,
@@ -170,14 +172,6 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 				photos: photoUrls
 			};
 
-			console.log(`Submitting announcement with ${photoUrls.length} photos`);
-			if (photoUrls.length > 0) {
-				console.log("Photo data lengths:", photoUrls.map(url => url.length));
-				console.log("First photo preview:", photoUrls[0].substring(0, 100) + "...");
-			}
-
-
-
 			const res = await fetch("/api/announcements/create", {
 				method: "POST",
 				headers: {
@@ -190,12 +184,8 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 
 			if (data.error) {
 				showToast("Error", data.error, "error");
-				console.error("Server error:", data.error);
 				return;
 			}
-
-			console.log("Announcement created successfully:", data.announcement);
-			console.log("Photos in created announcement:", data.announcement?.photos);
 
 			showToast("Success", "Announcement created successfully!", "success");
 			onAnnouncementCreated(data.announcement);
@@ -241,6 +231,10 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 				maxW={{ base: "calc(100vw - 1.5rem)", md: "600px" }}
 				mx={{ base: 3, md: 6 }}
 				my={{ base: 3, md: 6 }}
+				bg={panelBg}
+				borderWidth='1px'
+				borderColor={panelBorder}
+				className='modal-surface'
 			>
 				<ModalHeader>Create New Announcement</ModalHeader>
 				<ModalCloseButton />
@@ -253,6 +247,9 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								placeholder="Enter announcement title"
 								value={formData.title}
 								onChange={(e) => handleInputChange("title", e.target.value)}
+								bg={fieldBg}
+								borderColor={fieldBorder}
+								borderRadius='18px'
 							/>
 						</FormControl>
 
@@ -265,6 +262,9 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								onChange={(e) => handleInputChange("content", e.target.value)}
 								rows={5}
 								minH={{ base: "120px", md: "auto" }}
+								bg={fieldBg}
+								borderColor={fieldBorder}
+								borderRadius='18px'
 							/>
 						</FormControl>
 
@@ -276,13 +276,14 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 									<Button
 										leftIcon={<BsFillImageFill />}
 										onClick={() => imageRef.current?.click()}
-										variant="outline"
+										variant='unstyled'
 										size="sm"
 										w={{ base: "full", sm: "auto" }}
+										className='soft-button !h-10 !px-4'
 									>
 										Add Photos
 									</Button>
-									<Text fontSize="sm" color="gray.500">
+									<Text fontSize="sm" color={mutedText}>
 										Maximum 5 photos allowed
 									</Text>
 								</Stack>
@@ -313,7 +314,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 														w="full"
 														objectFit="cover"
 														border="1px"
-														borderColor="gray.200"
+														borderColor={fieldBorder}
 													/>
 													<CloseButton
 														position="absolute"
@@ -325,12 +326,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 														_hover={{ bg: "red.600" }}
 														onClick={() => removePhoto(photo.id)}
 													/>
-													<Text
-														fontSize="xs"
-														color="gray.600"
-														mt={1}
-														isTruncated
-													>
+													<Text fontSize="xs" color={mutedText} mt={1} isTruncated>
 														{photo.name}
 													</Text>
 												</Box>
@@ -423,6 +419,9 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								<Select
 									value={formData.priority}
 									onChange={(e) => handleInputChange("priority", e.target.value)}
+									bg={fieldBg}
+									borderColor={fieldBorder}
+									borderRadius='18px'
 								>
 									<option value="low">Low</option>
 									<option value="medium">Medium</option>
@@ -436,6 +435,9 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								<Select
 									value={formData.category}
 									onChange={(e) => handleInputChange("category", e.target.value)}
+									bg={fieldBg}
+									borderColor={fieldBorder}
+									borderRadius='18px'
 								>
 									<option value="general">General</option>
 									<option value="academic">Academic</option>
@@ -453,6 +455,9 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 								type="datetime-local"
 								value={formData.expiryDate}
 								onChange={(e) => handleInputChange("expiryDate", e.target.value)}
+								bg={fieldBg}
+								borderColor={fieldBorder}
+								borderRadius='18px'
 							/>
 						</FormControl>
 					</VStack>
@@ -460,7 +465,7 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 
 				<ModalFooter>
 					<Flex w="full" gap={3} direction={{ base: "column-reverse", sm: "row" }} justify="flex-end">
-						<Button variant="ghost" onClick={handleClose} w={{ base: "full", sm: "auto" }}>
+						<Button variant='unstyled' onClick={handleClose} w={{ base: "full", sm: "auto" }} className='danger-soft-button !h-11 !px-5'>
 							Cancel
 						</Button>
 						<Button
@@ -469,6 +474,8 @@ const CreateAnnouncementModal = ({ isOpen, onClose, onAnnouncementCreated }) => 
 							isLoading={loading}
 							loadingText="Creating..."
 							w={{ base: "full", sm: "auto" }}
+							borderRadius='full'
+							h='44px'
 						>
 							Create Announcement
 						</Button>

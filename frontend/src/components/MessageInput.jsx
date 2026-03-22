@@ -1,5 +1,6 @@
 import {
 	Flex,
+	IconButton,
 	Image,
 	Input,
 	InputGroup,
@@ -11,6 +12,7 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	Spinner,
+	useColorModeValue,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { IoSendSharp } from "react-icons/io5";
@@ -28,6 +30,12 @@ const MessageInput = ({ setMessages }) => {
 	const imageRef = useRef(null);
 	const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
 	const [isSending, setIsSending] = useState(false);
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const fieldText = useColorModeValue("gray.800", "whiteAlpha.900");
+	const modalBg = useColorModeValue("whiteAlpha.900", "gray.900");
+	const modalBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const iconColor = useColorModeValue("blue.500", "blue.200");
 
 	const handleSendMessage = async (e) => {
 		e.preventDefault();
@@ -53,7 +61,6 @@ const MessageInput = ({ setMessages }) => {
 				showToast("Error", data.error, "error");
 				return;
 			}
-			console.log(data);
 			setMessages((messages) => [...messages, data]);
 
 			setConversations((prevConvs) => {
@@ -88,13 +95,17 @@ const MessageInput = ({ setMessages }) => {
 						placeholder='Type a message'
 						onChange={(e) => setMessageText(e.target.value)}
 						value={messageText}
+						borderRadius='18px'
+						bg={fieldBg}
+						borderColor={fieldBorder}
+						color={fieldText}
 					/>
 					<InputRightElement onClick={handleSendMessage} cursor={"pointer"}>
-						<IoSendSharp />
+						<IoSendSharp color={iconColor} />
 					</InputRightElement>
 				</InputGroup>
 			</form>
-			<Flex flexShrink={0} cursor={"pointer"} alignItems='center' justifyContent='center'>
+			<Flex flexShrink={0} cursor={"pointer"} alignItems='center' justifyContent='center' color={iconColor}>
 				<BsFillImageFill size={20} onClick={() => imageRef.current.click()} />
 				<Input type={"file"} hidden ref={imageRef} onChange={handleImageChange} />
 			</Flex>
@@ -105,7 +116,7 @@ const MessageInput = ({ setMessages }) => {
 				}}
 			>
 				<ModalOverlay />
-				<ModalContent mx={4}>
+				<ModalContent mx={4} bg={modalBg} borderWidth='1px' borderColor={modalBorder} className='modal-surface'>
 					<ModalHeader></ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
@@ -114,7 +125,13 @@ const MessageInput = ({ setMessages }) => {
 						</Flex>
 						<Flex justifyContent={"flex-end"} my={2}>
 							{!isSending ? (
-								<IoSendSharp size={24} cursor={"pointer"} onClick={handleSendMessage} />
+								<IconButton
+									icon={<IoSendSharp />}
+									aria-label='Send image'
+									colorScheme='blue'
+									borderRadius='full'
+									onClick={handleSendMessage}
+								/>
 							) : (
 								<Spinner size={"md"} />
 							)}

@@ -1,13 +1,13 @@
-import { Avatar, Image, Box, Flex, Text } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
-import Actions from "./Actions";
-import { useEffect, useState } from "react";
-import useShowToast from "../hooks/useShowToast";
-import { formatDistanceToNow } from "date-fns";
+import { Avatar, Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
+import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import userAtom from "../atoms/userAtom";
 import postsAtom from "../atoms/postsAtom";
+import userAtom from "../atoms/userAtom";
+import useShowToast from "../hooks/useShowToast";
+import Actions from "./Actions";
 
 const Post = ({ post, postedBy }) => {
 	const [user, setUser] = useState(null);
@@ -15,11 +15,16 @@ const Post = ({ post, postedBy }) => {
 	const currentUser = useRecoilValue(userAtom);
 	const [posts, setPosts] = useRecoilState(postsAtom);
 	const navigate = useNavigate();
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
+	const mutedColor = useColorModeValue("gray.500", "gray.400");
+	const imageBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const dividerColor = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
 
 	useEffect(() => {
 		const getUser = async () => {
 			try {
-				const res = await fetch("/api/users/profile/" + postedBy);
+				const res = await fetch(`/api/users/profile/${postedBy}`);
 				const data = await res.json();
 				if (data.error) {
 					showToast("Error", data.error, "error");
@@ -48,112 +53,76 @@ const Post = ({ post, postedBy }) => {
 				showToast("Error", data.error, "error");
 				return;
 			}
+
 			showToast("Success", "Post deleted", "success");
-			setPosts(posts.filter((p) => p._id !== post._id));
+			setPosts(posts.filter((currentPost) => currentPost._id !== post._id));
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		}
 	};
 
 	if (!user) return null;
+
 	return (
-		<Link to={`/${user.username}/post/${post._id}`}>
-			<Flex gap={{ base: 2, md: 3 }} mb={4} py={5} alignItems='flex-start'>
-				<Flex flexDirection={"column"} alignItems={"center"}>
-					<Avatar
-						size='md'
-						name={user.name}
-						src={user?.profilePic}
-						onClick={(e) => {
-							e.preventDefault();
-							navigate(`/${user.username}`);
-						}}
-					/>
-					<Box w='1px' h={"full"} bg='gray.light' my={2}></Box>
-					<Box position={"relative"} w={"full"}>
-						{post.replies.length === 0 && <Text textAlign={"center"}>🥱</Text>}
-						{post.replies[0] && (
+		<Link to={`/${user.username}/post/${post._id}`} className='block'>
+			<Box className='glass-panel surface-hover px-4 py-4 md:px-5 md:py-5'>
+				<Flex direction='column' gap={4}>
+					<Flex justifyContent='space-between' alignItems='flex-start' gap={3}>
+						<Flex align='center' gap={3} minW={0}>
 							<Avatar
-								size='xs'
-								name='John doe'
-								src={post.replies[0].userProfilePic}
-								position={"absolute"}
-								top={"0px"}
-								left='15px'
-								padding={"2px"}
-							/>
-						)}
-
-						{post.replies[1] && (
-							<Avatar
-								size='xs'
-								name='John doe'
-								src={post.replies[1].userProfilePic}
-								position={"absolute"}
-								bottom={"0px"}
-								right='-5px'
-								padding={"2px"}
-							/>
-						)}
-
-						{post.replies[2] && (
-							<Avatar
-								size='xs'
-								name='John doe'
-								src={post.replies[2].userProfilePic}
-								position={"absolute"}
-								bottom={"0px"}
-								left='4px'
-								padding={"2px"}
-							/>
-						)}
-					</Box>
-				</Flex>
-				<Flex flex={1} flexDirection={"column"} gap={2} minW={0}>
-					<Flex
-						justifyContent={"space-between"}
-						w={"full"}
-						gap={2}
-						alignItems={{ base: "flex-start", sm: "center" }}
-						flexWrap='wrap'
-					>
-						<Flex flex={1} minW={0} alignItems={"center"}>
-							<Text
-								fontSize={"sm"}
-								fontWeight={"bold"}
-								noOfLines={1}
+								size='md'
+								name={user.name}
+								src={user?.profilePic}
 								onClick={(e) => {
 									e.preventDefault();
 									navigate(`/${user.username}`);
 								}}
-							>
-								{user?.username}
-							</Text>
-							{/* <Image src='/verified.png' w={4} h={4} ml={1} /> */}
+							/>
+							<Box minW={0}>
+								<Flex align='center' gap={2.5} wrap='wrap'>
+									<Text
+										className='font-display text-base font-semibold'
+										color={titleColor}
+										noOfLines={1}
+										onClick={(e) => {
+											e.preventDefault();
+											navigate(`/${user.username}`);
+										}}
+									>
+										{user?.username}
+									</Text>
+									<Box className='metric-pill'>Student post</Box>
+								</Flex>
+								<Text mt={0.5} fontSize='xs' color={mutedColor}>
+									{formatDistanceToNow(new Date(post.createdAt))} ago
+								</Text>
+							</Box>
 						</Flex>
-						<Flex gap={{ base: 2, md: 4 }} alignItems={"center"} flexShrink={0}>
-							<Text fontSize={"xs"} whiteSpace='nowrap' textAlign={"right"} color={"gray.light"}>
-								{formatDistanceToNow(new Date(post.createdAt))} ago
-							</Text>
 
-							{currentUser?._id === user._id && <DeleteIcon size={20} onClick={handleDeletePost} />}
-						</Flex>
+						{currentUser?._id === user._id && (
+							<Box as='button' onClick={handleDeletePost} className='danger-soft-button !p-2'>
+								<DeleteIcon boxSize={3.5} />
+							</Box>
+						)}
 					</Flex>
 
-					<Text fontSize={"sm"} wordBreak='break-word'>
-						{post.text}
-					</Text>
+					{post.text && (
+						<Text fontSize={{ base: "sm", md: "md" }} color={bodyColor} wordBreak='break-word' lineHeight='1.75'>
+							{post.text}
+						</Text>
+					)}
+
 					{post.img && (
-						<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-							<Image src={post.img} w={"full"} />
+						<Box borderRadius='22px' overflow='hidden' borderWidth='1px' borderColor={imageBorder}>
+							<Image src={post.img} w='full' maxH='520px' objectFit='cover' />
 						</Box>
 					)}
 
-					<Flex gap={3} my={1}>
+					<Box pt={3} borderTopWidth='1px' borderColor={dividerColor}>
 						<Actions post={post} />
-					</Flex>
+					</Box>
 				</Flex>
-			</Flex>
+			</Box>
 		</Link>
 	);
 };

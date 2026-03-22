@@ -52,6 +52,7 @@ const AuthPage = () => {
 	const featureIconBg = useColorModeValue("blue.50", "whiteAlpha.200");
 	const featureIconColor = useColorModeValue("blue.600", "blue.200");
 	const calloutBg = useColorModeValue("blue.50", "whiteAlpha.100");
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
 
 	useEffect(() => {
 		const mode = searchParams.get("mode");
@@ -73,19 +74,25 @@ const AuthPage = () => {
 	return (
 		<Flex
 			direction={{ base: "column", lg: "row" }}
-			gap={{ base: 8, lg: 12 }}
-			align="stretch"
-			py={{ base: 2, md: 4 }}
+			gap={{ base: 10, lg: 16 }}
+			align="center"
+			justify="center"
+			minH="100vh"
+			py={{ base: 12, md: 24 }}
+			px={{ base: 5, md: 8 }}
+			maxW="1300px"
+			mx="auto"
 		>
-			<VStack flex={1} align="stretch" spacing={{ base: 6, md: 8 }}>
-				<Stack spacing={4}>
+			<VStack flex={1} align="stretch" spacing={{ base: 8, md: 10 }}>
+				<Stack spacing={5}>
 					<Badge
 						alignSelf="flex-start"
-						colorScheme="blue"
+						colorScheme='blue'
 						px={4}
-						py={1.5}
-						borderRadius="full"
-						fontSize="0.85rem"
+						py={2}
+						borderRadius='full'
+						fontWeight='semibold'
+						letterSpacing='0.18em'
 					>
 						Built for CHARUSAT University
 					</Badge>
@@ -93,8 +100,10 @@ const AuthPage = () => {
 						fontSize={{ base: "3xl", md: "4xl", xl: "5xl" }}
 						lineHeight={{ base: 1.2, md: 1.1 }}
 						maxW="14ch"
+						className='!font-display !tracking-tight'
+						color={titleColor}
 					>
-						UNI Connect for the CHARUSAT campus community
+						UNI Connect for the <span className='gradient-text'>CHARUSAT campus community</span>
 					</Heading>
 					<Text fontSize={{ base: "md", md: "lg" }} color={mutedText} maxW="2xl">
 						UNI Connect is a university collaboration platform designed for CHARUSAT students and faculty to
@@ -109,6 +118,7 @@ const AuthPage = () => {
 					borderRadius="2xl"
 					boxShadow="lg"
 					p={{ base: 5, md: 6 }}
+					className='glass-panel-strong overflow-hidden'
 				>
 					<SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
 						{featureCards.map((feature) => (
@@ -119,6 +129,7 @@ const AuthPage = () => {
 								borderColor={panelBorder}
 								borderRadius="xl"
 								p={4}
+								className='surface-hover'
 							>
 								<HStack align="flex-start" spacing={4}>
 									<Flex

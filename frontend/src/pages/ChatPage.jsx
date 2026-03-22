@@ -1,15 +1,18 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Box, Button, Flex, Input, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
-import Conversation from "../components/Conversation";
-import { GiConversation } from "react-icons/gi";
-import MessageContainer from "../components/MessageContainer";
 import { useCallback, useEffect, useState } from "react";
-import useShowToast from "../hooks/useShowToast";
+import { GiConversation } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom";
 import userAtom from "../atoms/userAtom";
+import Conversation from "../components/Conversation";
+import MessageContainer from "../components/MessageContainer";
+import AppSurface from "../components/ui/AppSurface";
+import EmptyState from "../components/ui/EmptyState";
+import SectionHeader from "../components/ui/SectionHeader";
 import { useSocket } from "../context/SocketContext";
-import { useNavigate } from "react-router-dom";
+import useShowToast from "../hooks/useShowToast";
 
 const ChatPage = () => {
 	const [searchingUser, setSearchingUser] = useState(false);
@@ -25,6 +28,14 @@ const ChatPage = () => {
 	const safeConversations = Array.isArray(conversations)
 		? conversations.filter((conversation) => conversation?.participants?.[0]?._id)
 		: [];
+	const titleColor = useColorModeValue("gray.800", "whiteAlpha.900");
+	const bodyColor = useColorModeValue("gray.600", "gray.300");
+	const fieldBg = useColorModeValue("blackAlpha.50", "whiteAlpha.50");
+	const fieldBorder = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const skeletonStart = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
+	const skeletonEnd = useColorModeValue("blackAlpha.200", "whiteAlpha.200");
+	const iconColor = useColorModeValue("brand.500", "brand.300");
+	const showConversationPanel = Boolean(selectedConversation._id);
 
 	const handleUnauthorized = useCallback(() => {
 		localStorage.removeItem("user-threads");
@@ -36,25 +47,22 @@ const ChatPage = () => {
 
 	useEffect(() => {
 		const handleMessagesSeen = ({ conversationId }) => {
-			setConversations((prev) => {
-				const updatedConversations = prev.map((conversation) => {
-					if (conversation._id === conversationId) {
-						return {
-							...conversation,
-							lastMessage: {
-								...conversation.lastMessage,
-								seen: true,
-							},
-						};
-					}
-					return conversation;
-				});
-				return updatedConversations;
-			});
+			setConversations((prev) =>
+				prev.map((conversation) =>
+					conversation._id === conversationId
+						? {
+								...conversation,
+								lastMessage: {
+									...conversation.lastMessage,
+									seen: true,
+								},
+						  }
+						: conversation
+				)
+			);
 		};
 
 		socket?.on("messagesSeen", handleMessagesSeen);
-
 		return () => socket?.off("messagesSeen", handleMessagesSeen);
 	}, [socket, setConversations]);
 
@@ -72,12 +80,7 @@ const ChatPage = () => {
 					setConversations([]);
 					return;
 				}
-				if (!Array.isArray(data)) {
-					showToast("Error", "Invalid conversations response from server", "error");
-					setConversations([]);
-					return;
-				}
-				setConversations(data);
+				setConversations(Array.isArray(data) ? data : []);
 			} catch (error) {
 				showToast("Error", error.message, "error");
 				setConversations([]);
@@ -87,21 +90,23 @@ const ChatPage = () => {
 		};
 
 		getConversations();
-	}, [handleUnauthorized, showToast, setConversations]);
+	}, [handleUnauthorized, setConversations, showToast]);
 
 	const handleConversationSearch = async (e) => {
 		e.preventDefault();
+		const query = searchText.trim();
+		if (!query) return;
+
 		setSearchingUser(true);
 		try {
-			const res = await fetch(`/api/users/profile/${searchText}`);
+			const res = await fetch(`/api/users/profile/${query}`);
 			const searchedUser = await res.json();
 			if (searchedUser.error) {
 				showToast("Error", searchedUser.error, "error");
 				return;
 			}
 
-			const messagingYourself = searchedUser._id === currentUser._id;
-			if (messagingYourself) {
+			if (searchedUser._id === currentUser._id) {
 				showToast("Error", "You cannot message yourself", "error");
 				return;
 			}
@@ -135,7 +140,14 @@ const ChatPage = () => {
 					},
 				],
 			};
-			setConversations((prevConvs) => [...prevConvs, mockConversation]);
+			setConversations((prevConvs) => [mockConversation, ...prevConvs]);
+			setSelectedConversation({
+				_id: mockConversation._id,
+				userId: searchedUser._id,
+				username: searchedUser.username,
+				userProfilePic: searchedUser.profilePic,
+				mock: true,
+			});
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		} finally {
@@ -144,84 +156,98 @@ const ChatPage = () => {
 	};
 
 	return (
-		<Box w='full' py={{ base: 2, md: 4 }}>
-			<Flex
-				gap={{ base: 4, lg: 6 }}
-				flexDirection={{ base: "column", lg: "row" }}
-				alignItems='stretch'
-				mx={"auto"}
-			>
+		<Box w='full'>
+			<AppSurface variant='strong' className='px-6 py-6 md:px-8 md:py-8'>
+				<SectionHeader
+					eyebrow='Messaging'
+					title='Direct conversations with classmates and faculty'
+					description='Search any user by username and switch between active campus conversations from one focused workspace.'
+				/>
+			</AppSurface>
+
+			<Flex gap={{ base: 4, lg: 6 }} mt={5} direction={{ base: "column", lg: "row" }} align='stretch'>
 				<Flex
-					flexDirection={"column"}
-					gap={3}
+					direction='column'
+					gap={4}
 					w='full'
-					flex={{ lg: "0 0 320px" }}
-					bg={useColorModeValue("white", "gray.dark")}
-					borderRadius='xl'
-					p={{ base: 3, md: 4 }}
+					flex={{ lg: "0 0 360px" }}
+					display={{ base: showConversationPanel ? "none" : "flex", lg: "flex" }}
 				>
-					<Text fontWeight={700} color={useColorModeValue("gray.600", "gray.400")}>
-						Your Conversations
-					</Text>
-					<form onSubmit={handleConversationSearch} style={{ width: "100%" }}>
-						<Flex alignItems={"center"} gap={2}>
-							<Input placeholder='Search for a user' onChange={(e) => setSearchText(e.target.value)} />
-							<Button size={"sm"} onClick={handleConversationSearch} isLoading={searchingUser}>
-								<SearchIcon />
-							</Button>
-						</Flex>
-					</form>
+					<AppSurface variant='strong' className='px-4 py-4 md:px-5 md:py-5'>
+						<SectionHeader
+							eyebrow='Inbox'
+							title='Your Conversations'
+							description='Jump into an existing thread or search for a new person to message.'
+						/>
 
-					{loadingConversations &&
-						[0, 1, 2, 3, 4].map((_, i) => (
-							<Flex key={i} gap={4} alignItems={"center"} p={"1"} borderRadius={"md"}>
-								<Box>
-									<SkeletonCircle size={"10"} />
-								</Box>
-								<Flex w={"full"} flexDirection={"column"} gap={3}>
-									<Skeleton h={"10px"} w={"80px"} />
-									<Skeleton h={"8px"} w={"90%"} />
-								</Flex>
-							</Flex>
-						))}
-
-					<Flex flexDirection='column' gap={1} maxH={{ base: "280px", lg: "70vh" }} overflowY='auto' pr={1}>
-						{!loadingConversations &&
-							safeConversations.map((conversation) => (
-								<Conversation
-									key={conversation._id}
-									isOnline={onlineUsers.includes(conversation.participants[0]._id)}
-									conversation={conversation}
+						<Box as='form' onSubmit={handleConversationSearch} mt={5}>
+							<Flex align='center' gap={2}>
+								<Input
+									placeholder='Search by username'
+									value={searchText}
+									onChange={(e) => setSearchText(e.target.value)}
+									borderRadius='18px'
+									bg={fieldBg}
+									borderColor={fieldBorder}
 								/>
-							))}
-						{!loadingConversations && safeConversations.length === 0 && (
-							<Text fontSize='sm' color='gray.500' py={4}>
-								No conversations yet.
-							</Text>
-						)}
-					</Flex>
-				</Flex>
-				{!selectedConversation._id && (
-					<Flex
-						flex={1}
-						borderRadius={"xl"}
-						p={{ base: 4, md: 6 }}
-						flexDir={"column"}
-						alignItems={"center"}
-						justifyContent={"center"}
-						minH={{ base: "220px", md: "400px" }}
-						bg={useColorModeValue("white", "gray.dark")}
-						textAlign='center'
-					>
-						<GiConversation size={100} />
-						<Text fontSize={20}>Select a conversation to start messaging</Text>
-					</Flex>
-				)}
+								<Button isLoading={searchingUser} onClick={handleConversationSearch} className='app-button app-button-primary'>
+									<SearchIcon />
+								</Button>
+							</Flex>
+						</Box>
 
-				{selectedConversation._id && <MessageContainer />}
+						<Flex direction='column' gap={2} mt={5} maxH={{ base: "65vh", lg: "calc(100vh - 360px)" }} overflowY='auto' pr={1}>
+							{loadingConversations &&
+								[0, 1, 2, 3, 4].map((_, i) => (
+									<Flex key={i} gap={4} alignItems='center' p={3} borderRadius='2xl' className='surface-subtle'>
+										<SkeletonCircle size='10' startColor={skeletonStart} endColor={skeletonEnd} />
+										<Flex w='full' flexDirection='column' gap={3}>
+											<Skeleton h='10px' w='80px' startColor={skeletonStart} endColor={skeletonEnd} />
+											<Skeleton h='8px' w='90%' startColor={skeletonStart} endColor={skeletonEnd} />
+										</Flex>
+									</Flex>
+								))}
+
+							{!loadingConversations &&
+								safeConversations.map((conversation) => (
+									<Conversation
+										key={conversation._id}
+										isOnline={onlineUsers.includes(conversation.participants[0]._id)}
+										conversation={conversation}
+									/>
+								))}
+
+							{!loadingConversations && safeConversations.length === 0 && (
+								<EmptyState
+									title='No conversations yet'
+									description='Search for a username above to start your first message thread.'
+									className='py-10'
+								/>
+							)}
+						</Flex>
+					</AppSurface>
+				</Flex>
+
+				<Box flex={1} w='full' display={{ base: showConversationPanel ? "block" : "none", lg: "block" }}>
+					{showConversationPanel ? (
+						<MessageContainer />
+					) : (
+						<EmptyState
+							title='Select a conversation to start messaging'
+							description='Pick someone from the list or search for a user to open a new thread.'
+							action={
+								<Box color={iconColor}>
+									<GiConversation size={72} />
+								</Box>
+							}
+							className='min-h-[340px] flex items-center justify-center'
+						/>
+					)}
+				</Box>
 			</Flex>
 		</Box>
 	);
 };
 
 export default ChatPage;
+
