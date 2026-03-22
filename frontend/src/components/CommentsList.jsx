@@ -14,7 +14,7 @@ import {
 	MenuItem,
 	Icon,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { useNavigate } from "react-router-dom";
 import userAtom from "../atoms/userAtom";
@@ -29,14 +29,36 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 	const user = useRecoilValue(userAtom);
 	const navigate = useNavigate();
 	const showToast = useShowToast();
-	const bgColor = useColorModeValue("gray.50", "gray.800");
-	const borderColor = useColorModeValue("gray.200", "gray.600");
+	const [localComments, setLocalComments] = useState(comments ?? []);
+	const cardBg = useColorModeValue("gray.50", "whiteAlpha.50");
+	const cardBorder = useColorModeValue("gray.200", "whiteAlpha.200");
+	const mutedText = useColorModeValue("gray.500", "gray.400");
+
+	useEffect(() => {
+		setLocalComments(comments ?? []);
+	}, [comments]);
+
+	const isOwnedByCurrentUser = (comment) =>
+		Boolean(
+			user &&
+				(comment.userId?.toString?.() === user._id?.toString?.() ||
+					comment.userId === user._id ||
+					user.role === "admin")
+		);
+
+	const isCommentLiked = (comment) =>
+		Boolean(
+			user &&
+				Array.isArray(comment.likes) &&
+				comment.likes.some((id) => id?.toString?.() === user._id?.toString?.() || id === user._id)
+		);
 
 	const handleDeleteComment = async (commentId) => {
 		try {
-			const endpoint = type === "post" 
-				? `/api/posts/${targetId}/reply/${commentId}`
-				: `/api/announcements/${targetId}/reply/${commentId}`;
+			const endpoint =
+				type === "post"
+					? `/api/posts/${targetId}/reply/${commentId}`
+					: `/api/announcements/${targetId}/reply/${commentId}`;
 
 			const res = await fetch(endpoint, {
 				method: "DELETE",
@@ -48,18 +70,25 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 				return;
 			}
 
+			setLocalComments((prev) => prev.filter((comment) => comment._id !== commentId));
 			showToast("Success", "Comment deleted successfully!", "success");
-			onDeleteComment(commentId);
+			onDeleteComment?.(commentId);
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		}
 	};
 
 	const handleLikeComment = async (commentId) => {
+		if (!user) {
+			showToast("Error", "You must be logged in to like comments", "error");
+			return;
+		}
+
 		try {
-			const endpoint = type === "post" 
-				? `/api/posts/${targetId}/reply/${commentId}/like`
-				: `/api/announcements/${targetId}/reply/${commentId}/like`;
+			const endpoint =
+				type === "post"
+					? `/api/posts/${targetId}/reply/${commentId}/like`
+					: `/api/announcements/${targetId}/reply/${commentId}/like`;
 
 			const res = await fetch(endpoint, {
 				method: "PUT",
@@ -71,8 +100,25 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 				return;
 			}
 
-			// Update comment likes in parent component
-			// This would need to be handled by the parent component
+			setLocalComments((prev) =>
+				prev.map((comment) => {
+					if (comment._id !== commentId) {
+						return comment;
+					}
+
+					const likes = Array.isArray(comment.likes) ? comment.likes : [];
+					const alreadyLiked = likes.some(
+						(id) => id?.toString?.() === user._id?.toString?.() || id === user._id
+					);
+
+					return {
+						...comment,
+						likes: alreadyLiked
+							? likes.filter((id) => id?.toString?.() !== user._id?.toString?.() && id !== user._id)
+							: [...likes, user._id],
+					};
+				})
+			);
 		} catch (error) {
 			showToast("Error", error.message, "error");
 		}
@@ -80,17 +126,17 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 
 	const renderCommentText = (text) => {
 		if (!text) return "";
-		
+
 		const parts = text.split(/(@\w+)/g);
 		return parts.map((part, index) => {
-			if (part.startsWith('@')) {
-				const username = part.substring(1); // Remove @ symbol
+			if (part.startsWith("@")) {
+				const username = part.substring(1);
 				return (
-					<Text 
-						key={index} 
-						as="span" 
-						color="blue.500" 
-						fontWeight="medium" 
+					<Text
+						key={index}
+						as="span"
+						color="blue.500"
+						fontWeight="medium"
 						cursor="pointer"
 						_hover={{ color: "blue.600", textDecoration: "underline" }}
 						onClick={(e) => {
@@ -114,10 +160,10 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 		}
 	};
 
-	if (!comments || comments.length === 0) {
+	if (!localComments || localComments.length === 0) {
 		return (
 			<Box p={4} textAlign="center">
-				<Text color="gray.500" fontSize="sm">
+				<Text color={mutedText} fontSize="sm">
 					No comments yet. Be the first to comment!
 				</Text>
 			</Box>
@@ -125,37 +171,41 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 	}
 
 	return (
-		<VStack align="stretch" spacing={4}>
-			{comments.map((comment) => (
-				<Box key={comment._id}>
+		<VStack align="stretch" spacing={3}>
+			{localComments.map((comment) => (
+				<Box
+					key={comment._id}
+					bg={cardBg}
+					borderWidth="1px"
+					borderColor={cardBorder}
+					borderRadius="xl"
+					p={{ base: 3, md: 4 }}
+				>
 					<HStack align="flex-start" spacing={3}>
-						<Avatar
-							size="sm"
-							src={comment.userProfilePic}
-							name={comment.username}
-						/>
-						<Box flex={1}>
-							<HStack justify="space-between" align="flex-start">
-								<Box>
-									<HStack spacing={2} align="center">
-										<Text fontSize="sm" fontWeight="bold">
+						<Avatar size="sm" src={comment.userProfilePic} name={comment.username} />
+						<Box flex={1} minW={0}>
+							<Flex justify="space-between" align="flex-start" gap={3}>
+								<Box minW={0}>
+									<HStack spacing={2} align="center" flexWrap="wrap">
+										<Text fontSize="sm" fontWeight="bold" noOfLines={1}>
 											{comment.username}
 										</Text>
-										<Text fontSize="xs" color="gray.500">
+										<Text fontSize="xs" color={mutedText}>
 											{formatTimeAgo(comment.createdAt)}
 										</Text>
 									</HStack>
-									<Text fontSize="sm" mt={1}>
+									<Text fontSize="sm" mt={1.5} wordBreak="break-word">
 										{renderCommentText(comment.text)}
 									</Text>
 								</Box>
-								{user && (user._id === comment.userId || user.role === "admin") && (
+								{isOwnedByCurrentUser(comment) && (
 									<Menu>
 										<MenuButton
 											as={IconButton}
 											icon={<BsThreeDots />}
 											variant="ghost"
 											size="sm"
+											aria-label="Comment options"
 										/>
 										<MenuList>
 											<MenuItem
@@ -168,23 +218,20 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 										</MenuList>
 									</Menu>
 								)}
-							</HStack>
+							</Flex>
 
-							{/* Comment actions */}
-							<HStack spacing={4} mt={2}>
+							<HStack spacing={2} mt={3}>
 								<Button
 									variant="ghost"
 									size="xs"
 									leftIcon={
-										<Icon as={comment.likes?.includes(user?._id) ? FaHeart : FiHeart} 
-											color={comment.likes?.includes(user?._id) ? "red.500" : "gray.400"} 
-										/>
+										<Icon as={isCommentLiked(comment) ? FaHeart : FiHeart} color={isCommentLiked(comment) ? "red.500" : mutedText} />
 									}
 									onClick={() => handleLikeComment(comment._id)}
-									color={comment.likes?.includes(user?._id) ? "red.500" : "gray.500"}
-									_hover={{ 
-										color: comment.likes?.includes(user?._id) ? "red.600" : "red.400",
-										bg: "transparent"
+									color={isCommentLiked(comment) ? "red.500" : mutedText}
+									_hover={{
+										color: isCommentLiked(comment) ? "red.600" : "red.400",
+										bg: "transparent",
 									}}
 									px={2}
 									py={1}
@@ -192,24 +239,12 @@ const CommentsList = ({ comments, onDeleteComment, type = "post", targetId }) =>
 								>
 									{comment.likes?.length || 0}
 								</Button>
-								<Button
-									variant="ghost"
-									size="xs"
-									color="gray.500"
-									_hover={{ color: "blue.500", bg: "transparent" }}
-									px={2}
-									py={1}
-									h="auto"
-								>
-									Reply
-								</Button>
 							</HStack>
 
-							{/* Show mentions if any */}
 							{comment.mentions && comment.mentions.length > 0 && (
 								<Box mt={2}>
-									<Text fontSize="xs" color="gray.500">
-										Mentioned: {comment.mentions.map(mention => `@${mention}`).join(', ')}
+									<Text fontSize="xs" color={mutedText}>
+										Mentioned: {comment.mentions.map((mention) => `@${mention}`).join(", ")}
 									</Text>
 								</Box>
 							)}

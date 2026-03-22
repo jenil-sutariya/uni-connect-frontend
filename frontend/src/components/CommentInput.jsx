@@ -7,13 +7,8 @@ import {
 	Text,
 	useColorModeValue,
 	Flex,
-	Menu,
-	MenuButton,
-	MenuList,
-	MenuItem,
-	Portal,
 } from "@chakra-ui/react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
@@ -22,113 +17,118 @@ const CommentInput = ({ onComment, type = "post", targetId, placeholder = "Write
 	const [comment, setComment] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showMentions, setShowMentions] = useState(false);
-	const [mentionSearch, setMentionSearch] = useState("");
 	const [mentionUsers, setMentionUsers] = useState([]);
-	const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 	const user = useRecoilValue(userAtom);
 	const showToast = useShowToast();
 	const textareaRef = useRef(null);
-	const bgColor = useColorModeValue("white", "gray.800");
-	const borderColor = useColorModeValue("gray.200", "gray.600");
+	const dropdownBg = useColorModeValue("white", "gray.800");
+	const dropdownBorder = useColorModeValue("gray.200", "gray.600");
+	const inputBg = useColorModeValue("white", "gray.900");
+	const inputBorder = useColorModeValue("gray.200", "whiteAlpha.200");
+	const mutedText = useColorModeValue("gray.500", "gray.400");
+	const mentionHoverBg = useColorModeValue("gray.100", "gray.700");
+	const emptyStateBg = useColorModeValue("gray.50", "whiteAlpha.50");
+
+	const extractMentions = (text) => {
+		const mentionRegex = /@(\w+)/g;
+		const mentions = [];
+		let match;
+
+		while ((match = mentionRegex.exec(text)) !== null) {
+			mentions.push(match[1]);
+		}
+
+		return mentions;
+	};
 
 	const handleCommentChange = async (e) => {
 		const value = e.target.value;
 		setComment(value);
 
-		// Check for @ mentions
 		const cursorPosition = e.target.selectionStart;
 		const textBeforeCursor = value.substring(0, cursorPosition);
 		const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
 
-		if (mentionMatch) {
-			const searchTerm = mentionMatch[1];
-			setMentionSearch(searchTerm);
+		if (!mentionMatch) {
+			setShowMentions(false);
+			setMentionUsers([]);
+			return;
+		}
 
-			// Get cursor position for mention dropdown
-			const textarea = textareaRef.current;
-			const coords = getCaretCoordinates(textarea, cursorPosition);
-			setMentionPosition({
-				top: coords.top + 20,
-				left: coords.left
-			});
+		const searchTerm = mentionMatch[1];
 
-			// Search for users - only search if we have at least 1 character
-			if (searchTerm.length >= 1) {
-				try {
-					const res = await fetch(`/api/users/search?query=${searchTerm}&limit=5`);
-					const data = await res.json();
-					if (!data.error && Array.isArray(data)) {
-						setMentionUsers(data);
-						setShowMentions(true);
-					} else {
-						setMentionUsers([]);
-						setShowMentions(false);
-					}
-				} catch (error) {
-					console.error("Error searching users:", error);
+		if (searchTerm.length >= 1) {
+			try {
+				const res = await fetch(`/api/users/search?query=${searchTerm}&limit=5`);
+				const data = await res.json();
+
+				if (!data.error && Array.isArray(data)) {
+					setMentionUsers(data);
+					setShowMentions(data.length > 0);
+				} else {
 					setMentionUsers([]);
 					setShowMentions(false);
 				}
-			} else if (searchTerm.length === 0) {
-				// Show recent or suggested users when just typing @
-				try {
-					const res = await fetch(`/api/users/suggested?limit=5`);
-					const data = await res.json();
-					if (!data.error && Array.isArray(data)) {
-						setMentionUsers(data);
-						setShowMentions(true);
-					}
-				} catch (error) {
-					console.error("Error getting suggested users:", error);
-				}
+			} catch (error) {
+				console.error("Error searching users:", error);
+				setMentionUsers([]);
+				setShowMentions(false);
 			}
-		} else {
-			setShowMentions(false);
+			return;
+		}
+
+		try {
+			const res = await fetch("/api/users/suggested?limit=5");
+			const data = await res.json();
+
+			if (!data.error && Array.isArray(data)) {
+				setMentionUsers(data);
+				setShowMentions(data.length > 0);
+			} else {
+				setMentionUsers([]);
+				setShowMentions(false);
+			}
+		} catch (error) {
+			console.error("Error getting suggested users:", error);
 			setMentionUsers([]);
+			setShowMentions(false);
 		}
 	};
 
 	const handleMentionSelect = (selectedUser) => {
-		const cursorPosition = textareaRef.current.selectionStart;
+		const cursorPosition = textareaRef.current?.selectionStart ?? 0;
 		const textBeforeCursor = comment.substring(0, cursorPosition);
 		const textAfterCursor = comment.substring(cursorPosition);
-		
-		// Replace the partial mention with the complete username
 		const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+
 		if (mentionMatch) {
 			const beforeMention = textBeforeCursor.substring(0, mentionMatch.index);
-			const newComment = `${beforeMention}@${selectedUser.username} ${textAfterCursor}`;
-			setComment(newComment);
+			setComment(`${beforeMention}@${selectedUser.username} ${textAfterCursor}`);
 		}
 
 		setShowMentions(false);
 		setMentionUsers([]);
-		textareaRef.current.focus();
+		textareaRef.current?.focus();
 	};
 
 	const handleSubmit = async () => {
-		if (!comment.trim()) return;
+		if (!comment.trim() || !targetId) return;
 
 		setIsSubmitting(true);
 		try {
-			// Extract mentions from comment
-			const mentions = extractMentions(comment);
-
-			const commentData = {
-				text: comment,
-				mentions: mentions
-			};
-
-			const endpoint = type === "post" 
-				? `/api/posts/reply/${targetId}`
-				: `/api/announcements/reply/${targetId}`;
+			const endpoint =
+				type === "post" ? `/api/posts/reply/${targetId}` : `/api/announcements/${targetId}/reply`;
+			const method = type === "post" ? "PUT" : "POST";
 
 			const res = await fetch(endpoint, {
-				method: "PUT",
+				method,
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify(commentData),
+				body: JSON.stringify({
+					text: comment,
+					mentions: extractMentions(comment),
+				}),
 			});
 
 			const data = await res.json();
@@ -139,6 +139,8 @@ const CommentInput = ({ onComment, type = "post", targetId, placeholder = "Write
 
 			showToast("Success", "Comment posted successfully!", "success");
 			setComment("");
+			setShowMentions(false);
+			setMentionUsers([]);
 			onComment(data);
 		} catch (error) {
 			showToast("Error", error.message, "error");
@@ -147,89 +149,89 @@ const CommentInput = ({ onComment, type = "post", targetId, placeholder = "Write
 		}
 	};
 
-	const extractMentions = (text) => {
-		const mentionRegex = /@(\w+)/g;
-		const mentions = [];
-		let match;
-		while ((match = mentionRegex.exec(text)) !== null) {
-			mentions.push(match[1]);
-		}
-		return mentions;
-	};
-
-	// Function to get caret coordinates (simplified)
-	const getCaretCoordinates = (element, position) => {
-		const div = document.createElement('div');
-		const copyStyle = getComputedStyle(element);
-		for (const prop of copyStyle) {
-			div.style[prop] = copyStyle[prop];
-		}
-		div.style.position = 'absolute';
-		div.style.visibility = 'hidden';
-		div.style.height = 'auto';
-		div.style.width = copyStyle.width;
-		div.style.whiteSpace = 'pre-wrap';
-		div.style.wordWrap = 'break-word';
-		
-		div.textContent = element.value.substring(0, position);
-		document.body.appendChild(div);
-		
-		const coordinates = {
-			top: div.offsetHeight,
-			left: div.offsetWidth
-		};
-		
-		document.body.removeChild(div);
-		return coordinates;
-	};
-
-	const renderCommentText = (text) => {
-		const parts = text.split(/(@\w+)/g);
-		return parts.map((part, index) => {
-			if (part.startsWith('@')) {
-				return (
-					<Text key={index} as="span" color="blue.500" fontWeight="medium">
-						{part}
-					</Text>
-				);
-			}
-			return part;
-		});
-	};
-
 	if (!user) {
 		return (
-			<Box p={4} textAlign="center">
-				<Text color="gray.500">Please log in to comment</Text>
+			<Box
+				p={4}
+				textAlign="center"
+				borderRadius="lg"
+				bg={emptyStateBg}
+				borderWidth="1px"
+				borderColor={inputBorder}
+			>
+				<Text color={mutedText}>Please log in to comment</Text>
 			</Box>
 		);
 	}
 
 	return (
 		<Box position="relative">
-			<HStack align="flex-start" spacing={3} mb={3}>
+			<HStack align="flex-start" spacing={3}>
 				<Avatar size="sm" src={user.profilePic} name={user.username} />
-				<Box flex={1}>
-					<Textarea
-						ref={textareaRef}
-						value={comment}
-						onChange={handleCommentChange}
-						placeholder={placeholder}
-						resize="none"
-						minH="40px"
-						maxH="120px"
-						border="1px solid"
-						borderColor="gray.200"
-						bg="white"
-						fontSize="sm"
-						borderRadius="md"
-						_focus={{
-							borderColor: "blue.400",
-							boxShadow: "0 0 0 1px blue.400"
-						}}
-					/>
-					<HStack justify="space-between" mt={2}>
-						<Text fontSize="xs" color="gray.500">
+				<Box flex={1} position="relative">
+					<Box position="relative">
+						<Textarea
+							ref={textareaRef}
+							value={comment}
+							onChange={handleCommentChange}
+							placeholder={placeholder}
+							resize="none"
+							minH="84px"
+							maxH="160px"
+							border="1px solid"
+							borderColor={inputBorder}
+							bg={inputBg}
+							fontSize="sm"
+							borderRadius="xl"
+							px={4}
+							py={3}
+							_focus={{
+								borderColor: "blue.400",
+								boxShadow: "0 0 0 1px blue.400",
+							}}
+						/>
+
+						{showMentions && mentionUsers.length > 0 && (
+							<Box
+								position="absolute"
+								top="calc(100% + 8px)"
+								left={0}
+								right={0}
+								bg={dropdownBg}
+								border="1px solid"
+								borderColor={dropdownBorder}
+								borderRadius="md"
+								shadow="lg"
+								maxH="200px"
+								overflowY="auto"
+								zIndex={10}
+								maxW="320px"
+							>
+								{mentionUsers.map((mentionUser) => (
+									<Flex
+										key={mentionUser._id}
+										p={3}
+										align="center"
+										cursor="pointer"
+										_hover={{ bg: mentionHoverBg }}
+										onClick={() => handleMentionSelect(mentionUser)}
+									>
+										<Avatar size="xs" src={mentionUser.profilePic} name={mentionUser.username} mr={2} />
+										<Box>
+											<Text fontSize="sm" fontWeight="medium">
+												{mentionUser.username}
+											</Text>
+											<Text fontSize="xs" color={mutedText}>
+												{mentionUser.name}
+											</Text>
+										</Box>
+									</Flex>
+								))}
+							</Box>
+						)}
+					</Box>
+					<HStack justify="space-between" mt={3} flexWrap="wrap" spacing={3}>
+						<Text fontSize="xs" color={mutedText}>
 							Type @ to mention someone
 						</Text>
 						<Button
@@ -238,54 +240,14 @@ const CommentInput = ({ onComment, type = "post", targetId, placeholder = "Write
 							onClick={handleSubmit}
 							isLoading={isSubmitting}
 							isDisabled={!comment.trim()}
-							borderRadius="md"
+							borderRadius="full"
+							px={5}
 						>
-							Comment
+							Post {type === "post" ? "Comment" : "Reply"}
 						</Button>
 					</HStack>
 				</Box>
 			</HStack>
-
-			{/* Mention dropdown */}
-			{showMentions && mentionUsers.length > 0 && (
-				<Portal>
-					<Box
-						position="absolute"
-						top={`${mentionPosition.top}px`}
-						left={`${mentionPosition.left}px`}
-						bg={bgColor}
-						border="1px solid"
-						borderColor={borderColor}
-						borderRadius="md"
-						shadow="lg"
-						maxH="200px"
-						overflowY="auto"
-						zIndex={1000}
-						minW="200px"
-					>
-						{mentionUsers.map((mentionUser) => (
-							<Flex
-								key={mentionUser._id}
-								p={2}
-								align="center"
-								cursor="pointer"
-								_hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
-								onClick={() => handleMentionSelect(mentionUser)}
-							>
-								<Avatar size="xs" src={mentionUser.profilePic} name={mentionUser.username} mr={2} />
-								<Box>
-									<Text fontSize="sm" fontWeight="medium">
-										{mentionUser.username}
-									</Text>
-									<Text fontSize="xs" color="gray.500">
-										{mentionUser.name}
-									</Text>
-								</Box>
-							</Flex>
-						))}
-					</Box>
-				</Portal>
-			)}
 		</Box>
 	);
 };
