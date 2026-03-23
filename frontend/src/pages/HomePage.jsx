@@ -119,15 +119,6 @@ const HomePage = () => {
 								</Box>
 							))}
 						</SimpleGrid>
-
-						<AppSurface variant='subtleStrong' mt={4} className='px-4 py-3.5 md:px-5'>
-							<Text color={titleColor} fontWeight='semibold'>
-								Post sharing is now available from anywhere in the app
-							</Text>
-							<Text mt={1} color={bodyColor} fontSize='sm' lineHeight='1.6'>
-								Use the floating create button to publish a new update from the feed, profile, chat, or dashboard.
-							</Text>
-						</AppSurface>
 					</AppSurface>
 
 					{user?.role === "student" ? (

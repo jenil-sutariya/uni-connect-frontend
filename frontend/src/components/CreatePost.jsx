@@ -96,6 +96,10 @@ const CreatePost = () => {
 		}
 	};
 
+	if (user && pathname !== `/${user.username}`) {
+		return null;
+	}
+
 	return (
 		<>
 			<Button
