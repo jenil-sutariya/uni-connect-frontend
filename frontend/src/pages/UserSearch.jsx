@@ -86,14 +86,16 @@ const UserSearch = () => {
 						<Text className='section-eyebrow mb-2'>Discovery</Text>
 						<Text className='font-display text-2xl font-semibold' color={titleColor}>Search Users</Text>
 					</Box>
-					<IconButton
-						icon={<CloseIcon />}
+					<Box
+						as='button'
 						aria-label='Close'
 						onClick={() => navigate("/")}
-						size='sm'
-						variant='unstyled'
-						className='icon-button-soft !flex !h-10 !w-10'
-					/>
+						className='icon-button-soft !h-10 !w-10 !p-0'
+					>
+						<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+							<CloseIcon />
+						</Flex>
+					</Box>
 				</Flex>
 
 				<Flex alignItems='center' gap={2} flexDirection={{ base: "column", sm: "row" }}>

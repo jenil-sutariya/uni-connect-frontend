@@ -82,28 +82,30 @@ const UserHeader = ({ user }) => {
 
 					<HStack align='center' spacing={3}>
 						{currentUser?._id === user._id ? (
-							<Button
+							<Box
 								as={RouterLink}
 								to='/update'
-								variant='unstyled'
+								display="inline-flex"
 								className='app-button app-button-secondary'
 							>
 								Edit Profile
-							</Button>
+							</Box>
 						) : (
-							<Button
+							<Box
+								as='button'
 								onClick={handleFollowUnfollow}
-								isLoading={updating}
-								variant='unstyled'
-								className={`app-button ${following ? "app-button-secondary" : "app-button-primary"}`}
+								disabled={updating}
+								className={`app-button ${following ? "app-button-secondary" : "app-button-primary"} ${updating ? "opacity-70 cursor-not-allowed" : ""}`}
 							>
-								{following ? "Following" : "Follow"}
-							</Button>
+								{updating ? "Wait..." : following ? "Following" : "Follow"}
+							</Box>
 						)}
 
 						<Menu>
-							<MenuButton as={Button} variant='unstyled' className='icon-button-soft !flex !h-10 !w-10'>
-								<CgMoreO size={22} />
+							<MenuButton as={Box} role='button' className='icon-button-soft !h-10 !w-10 !p-0'>
+								<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+									<CgMoreO size={22} />
+								</Flex>
 							</MenuButton>
 							<Portal>
 								<MenuList bg={menuBg} borderColor={menuBorder} borderRadius='18px' p={2}>

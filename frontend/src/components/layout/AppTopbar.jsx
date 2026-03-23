@@ -62,14 +62,17 @@ const AppTopbar = ({ user }) => {
 		<>
 			<Flex justify='space-between' align='center' gap={4} className='topbar-shell'>
 				<Flex align='center' gap={3}>
-					<IconButton
+					<Box
+						as='button'
 						display={{ base: "inline-flex", lg: "none" }}
 						aria-label='Open navigation'
-						icon={<FiMenu size={20} />}
 						onClick={onOpen}
-						variant='unstyled'
-						className='icon-button-soft !flex !h-10 !w-10'
-					/>
+						className='icon-button-soft !h-10 !w-10 !p-0'
+					>
+						<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+							<FiMenu size={20} />
+						</Flex>
+					</Box>
 					<Link to='/' style={{ textDecoration: "none" }}>
 						<HStack spacing={3}>
 							<Box borderWidth='1px' borderColor={menuBorder} bg={useColorModeValue("whiteAlpha.700", "whiteAlpha.50")} borderRadius='16px' p={1.5}>
@@ -110,21 +113,23 @@ const AppTopbar = ({ user }) => {
 
 				<HStack spacing={2}>
 					<Menu>
-						<MenuButton as={Button} variant='unstyled' className='icon-button-soft !flex !h-10 !w-10'>
-							<Box position='relative'>
-								<FiBell size={18} />
-								<Box
-									position='absolute'
-									top='-1px'
-									right='-2px'
-									w='7px'
-									h='7px'
-									borderRadius='full'
-									bg='brand.400'
-									border='2px solid'
-									borderColor={useColorModeValue("white", "gray.900")}
-								/>
-							</Box>
+						<MenuButton as={Box} role='button' className='icon-button-soft !h-10 !w-10 !p-0'>
+							<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+								<Box position='relative'>
+									<FiBell size={18} />
+									<Box
+										position='absolute'
+										top='-1px'
+										right='-2px'
+										w='7px'
+										h='7px'
+										borderRadius='full'
+										bg='brand.400'
+										border='2px solid'
+										borderColor={useColorModeValue("white", "gray.900")}
+									/>
+								</Box>
+							</Flex>
 						</MenuButton>
 						<Portal>
 							<MenuList bg={menuBg} borderColor={menuBorder} borderRadius='18px' p={2}>
@@ -135,23 +140,27 @@ const AppTopbar = ({ user }) => {
 						</Portal>
 					</Menu>
 
-					<Button
+					<Box
+						as='button'
 						onClick={toggleColorMode}
-						variant='unstyled'
-						className='icon-button-soft !flex !h-10 !w-10'
+						className='icon-button-soft !h-10 !w-10 !p-0'
 						aria-label='Toggle theme'
 					>
-						<Image alt='toggle theme' w={{ base: 5, sm: 6 }} src={colorMode === "dark" ? "/dark-mode.svg" : "/light-mode.svg"} />
-					</Button>
+						<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+							<Image alt='toggle theme' w={{ base: 5, sm: 6 }} src={colorMode === "dark" ? "/dark-mode.svg" : "/light-mode.svg"} />
+						</Flex>
+					</Box>
 
 					<Menu>
-						<MenuButton as={Button} variant='unstyled' className='icon-button-soft !h-10 !rounded-full !pl-1 !pr-2.5'>
-							<HStack spacing={2}>
-								<Avatar size='xs' src={user?.profilePic} name={user?.name} />
-								<Text display={{ base: "none", md: "inline" }} color={titleColor} fontSize='sm'>
-									{user?.username}
-								</Text>
-							</HStack>
+						<MenuButton as={Box} role='button' className='icon-button-soft !h-10 !rounded-full !pl-1 !pr-2.5'>
+							<Flex h='100%' alignItems='center' justifyContent='center'>
+								<HStack spacing={2}>
+									<Avatar size='xs' src={user?.profilePic} name={user?.name} />
+									<Text display={{ base: "none", md: "inline" }} color={titleColor} fontSize='sm'>
+										{user?.username}
+									</Text>
+								</HStack>
+							</Flex>
 						</MenuButton>
 						<Portal>
 							<MenuList bg={menuBg} borderColor={menuBorder} borderRadius='18px' p={2} shadow='lg'>

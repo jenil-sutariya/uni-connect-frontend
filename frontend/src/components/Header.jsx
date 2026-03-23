@@ -121,18 +121,20 @@ const Header = () => {
 						})}
 					</HStack>
 
-					<Button
+					<Box
+						as='button'
 						onClick={toggleColorMode}
-						variant='unstyled'
-						className='icon-button-soft !flex !h-10 !w-10'
+						className='icon-button-soft !h-10 !w-10 !p-0'
 						aria-label='Toggle theme'
 					>
-						<Image
-							alt='toggle theme'
-							w={{ base: 5, sm: 6 }}
-							src={colorMode === "dark" ? "/dark-mode.svg" : "/light-mode.svg"}
-						/>
-					</Button>
+						<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+							<Image
+								alt='toggle theme'
+								w={{ base: 5, sm: 6 }}
+								src={colorMode === "dark" ? "/dark-mode.svg" : "/light-mode.svg"}
+							/>
+						</Flex>
+					</Box>
 
 					{user && (
 						<Button
@@ -146,14 +148,17 @@ const Header = () => {
 						</Button>
 					)}
 
-					<IconButton
+					<Box
+						as='button'
 						display={{ base: "inline-flex", lg: "none" }}
 						aria-label='Open navigation menu'
-						icon={<HamburgerIcon boxSize={5} />}
 						onClick={onOpen}
-						variant='unstyled'
-						className='icon-button-soft !flex !h-10 !w-10'
-					/>
+						className='icon-button-soft !h-10 !w-10 !p-0'
+					>
+						<Flex w='100%' h='100%' alignItems='center' justifyContent='center'>
+							<HamburgerIcon boxSize={5} />
+						</Flex>
+					</Box>
 				</Flex>
 			</Flex>
 
