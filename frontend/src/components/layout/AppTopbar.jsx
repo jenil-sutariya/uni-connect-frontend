@@ -154,11 +154,11 @@ const AppTopbar = ({ user }) => {
 							</HStack>
 						</MenuButton>
 						<Portal>
-							<MenuList bg={menuBg} borderColor={menuBorder} borderRadius='18px' p={2}>
-								<MenuItem borderRadius='12px' onClick={() => navigate(`/${user?.username}`)}>
+							<MenuList bg={menuBg} borderColor={menuBorder} borderRadius='18px' p={2} shadow='lg'>
+								<MenuItem borderRadius='12px' mb={1} onClick={() => navigate(`/${user?.username}`)}>
 									Profile
 								</MenuItem>
-								<MenuItem borderRadius='12px' onClick={() => navigate("/settings")}>
+								<MenuItem borderRadius='12px' mb={1} onClick={() => navigate("/settings")}>
 									Settings
 								</MenuItem>
 								<MenuItem borderRadius='12px' onClick={logout} icon={<FiLogOut />}>

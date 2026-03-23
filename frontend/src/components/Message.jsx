@@ -23,7 +23,7 @@ const Message = ({ ownMessage, message }) => {
 			{ownMessage ? (
 				<Flex gap={2} alignSelf={"flex-end"} maxW='full'>
 					{message.text && (
-						<Flex bg={ownBubbleBg} maxW={bubbleMaxW} p={3} borderRadius={"2xl"} alignItems='flex-end'>
+						<Flex bg={ownBubbleBg} maxW={bubbleMaxW} p={{base: 3, md: 4}} borderRadius={"2xl"} borderBottomRightRadius="md" boxShadow="sm" alignItems='flex-end'>
 							<Text color={ownBubbleColor} wordBreak='break-word'>
 								{message.text}
 							</Text>
@@ -71,9 +71,9 @@ const Message = ({ ownMessage, message }) => {
 					<Avatar src={selectedConversation.userProfilePic} w='7' h={7} />
 
 					{message.text && (
-						<Text maxW={bubbleMaxW} bg={otherBubbleBg} p={3} borderRadius={"2xl"} color={otherBubbleColor} wordBreak='break-word'>
-							{message.text}
-						</Text>
+						<Box maxW={bubbleMaxW} bg={otherBubbleBg} p={{base: 3, md: 4}} borderRadius={"2xl"} borderTopLeftRadius="md" boxShadow="sm" color={otherBubbleColor}>
+							<Text wordBreak='break-word'>{message.text}</Text>
+						</Box>
 					)}
 					{message.img && !imgLoaded && (
 						<Flex mt={5} w={imageWidth}>

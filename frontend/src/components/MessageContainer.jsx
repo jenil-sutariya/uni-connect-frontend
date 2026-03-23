@@ -129,8 +129,7 @@ const MessageContainer = () => {
 		<Flex
 			flex={1}
 			w='full'
-			minH={{ base: "calc(100vh - 170px)", md: "520px" }}
-			maxH={{ lg: "calc(100vh - 190px)" }}
+			h='full'
 			borderRadius={"xl"}
 			p={{ base: 3, md: 4 }}
 			flexDirection={"column"}

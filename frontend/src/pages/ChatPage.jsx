@@ -156,8 +156,8 @@ const ChatPage = () => {
 	};
 
 	return (
-		<Box w='full'>
-			<AppSurface variant='strong' className='px-6 py-6 md:px-8 md:py-8'>
+		<Box w='full' h={{ base: "calc(100vh - 120px)", md: "calc(100vh - 140px)" }} display="flex" flexDirection="column" overflow="hidden">
+			<AppSurface variant='strong' className='px-6 py-6 md:px-8 md:py-8 flex-shrink-0' display={{ base: showConversationPanel ? "none" : "block", lg: "block" }}>
 				<SectionHeader
 					eyebrow='Messaging'
 					title='Direct conversations with classmates and faculty'
@@ -165,7 +165,7 @@ const ChatPage = () => {
 				/>
 			</AppSurface>
 
-			<Flex gap={{ base: 4, lg: 6 }} mt={5} direction={{ base: "column", lg: "row" }} align='stretch'>
+			<Flex gap={{ base: 4, lg: 6 }} mt={{ base: 0, lg: 5 }} pt={{ base: showConversationPanel ? 0 : 4, lg: 0 }} direction={{ base: "column", lg: "row" }} align='stretch' flex={1} overflow="hidden">
 				<Flex
 					direction='column'
 					gap={4}
@@ -196,7 +196,7 @@ const ChatPage = () => {
 							</Flex>
 						</Box>
 
-						<Flex direction='column' gap={2} mt={5} maxH={{ base: "65vh", lg: "calc(100vh - 360px)" }} overflowY='auto' pr={1}>
+						<Flex direction='column' gap={2} mt={5} flex={1} overflowY='auto' pr={1}>
 							{loadingConversations &&
 								[0, 1, 2, 3, 4].map((_, i) => (
 									<Flex key={i} gap={4} alignItems='center' p={3} borderRadius='2xl' className='surface-subtle'>
@@ -228,7 +228,7 @@ const ChatPage = () => {
 					</AppSurface>
 				</Flex>
 
-				<Box flex={1} w='full' display={{ base: showConversationPanel ? "block" : "none", lg: "block" }}>
+				<Box flex={1} w='full' display={{ base: showConversationPanel ? "flex" : "none", lg: "flex" }} flexDirection="column" overflow="hidden">
 					{showConversationPanel ? (
 						<MessageContainer />
 					) : (
